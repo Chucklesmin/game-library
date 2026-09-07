@@ -1,6 +1,10 @@
-# Signal
+# Signal Game Library
 
-Signal is an original, non-commercial spectrum party game with 10 original packs and 300 spectra.
+Signal is a free, non-commercial game library. Its first original game is **Signal**, a spectrum party game with 10 packs and 300 spectra.
+
+## Library architecture
+
+The database has a generic `games → game_packs → game_content` catalog. A room records its selected game, immutable ruleset version, and game-specific state, allowing future games to use entirely different turn logic without altering room identity, membership, or realtime delivery.
 
 ## Rules
 
