@@ -15,6 +15,7 @@ export type RoomSnapshot = {
   game_id: string;
   game_version: number;
   game_state: Record<string, unknown>;
+  active_team: "amber" | "violet";
   amber_score: number;
   violet_score: number;
 };

@@ -9,6 +9,7 @@ export async function ensureGuest() {
   if (session) return session.user;
   const { data, error } = await db.auth.signInAnonymously();
   if (error) throw new Error("Guest sign-in is unavailable. Enable Anonymous Sign-Ins in Supabase Auth.");
+  if (!data.user) throw new Error("Guest sign-in did not return a user.");
   return data.user;
 }
 
@@ -34,9 +35,18 @@ export async function joinRoom(code: string, displayName: string) {
 }
 
 export async function getRoom(roomId: string): Promise<RoomSnapshot> {
-  const { data, error } = await client().from("rooms").select("id,code,status,game_id,game_version,game_state,amber_score,violet_score").eq("id", roomId).single();
+  const { data, error } = await client().from("rooms").select("id,code,status,game_id,game_version,game_state,active_team,amber_score,violet_score").eq("id", roomId).single();
   if (error) throw error;
   return data as RoomSnapshot;
+}
+
+export type CurrentRoomPlayer = { team: "amber" | "violet"; is_keeper: boolean };
+
+export async function getCurrentRoomPlayer(roomId: string): Promise<CurrentRoomPlayer> {
+  const user = await ensureGuest();
+  const { data, error } = await client().from("room_players").select("team,is_keeper").eq("room_id", roomId).eq("user_id", user.id).single();
+  if (error) throw error;
+  return data as CurrentRoomPlayer;
 }
 
 export async function updateRoomState(roomId: string, status: string, state: Record<string, unknown>) {
