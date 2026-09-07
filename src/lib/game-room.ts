@@ -33,6 +33,18 @@ export async function joinRoom(code: string, displayName: string) {
   return data as RoomSnapshot;
 }
 
+export async function getRoom(roomId: string): Promise<RoomSnapshot> {
+  const { data, error } = await client().from("rooms").select("id,code,status,game_id,game_version,game_state,amber_score,violet_score").eq("id", roomId).single();
+  if (error) throw error;
+  return data as RoomSnapshot;
+}
+
+export async function updateRoomState(roomId: string, status: string, state: Record<string, unknown>) {
+  const { data, error } = await client().rpc("update_room_state", { p_room_id: roomId, p_status: status, p_game_state: state });
+  if (error) throw error;
+  return data as RoomSnapshot;
+}
+
 export function subscribeToRoom(roomId: string, onUpdate: (room: RoomSnapshot) => void) {
   const db = client();
   const channel = db.channel(`room:${roomId}`).on("postgres_changes", { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${roomId}` }, (event) => onUpdate(event.new as RoomSnapshot)).subscribe();
