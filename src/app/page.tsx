@@ -11,6 +11,8 @@ type Phase = "lobby" | "clue" | "tune" | "intercept" | "reveal";
 type Side = "left" | "right";
 const clamp = (value: number) => Math.max(0, Math.min(100, value));
 const allSpectra = () => PACKS.flatMap((pack) => pack.spectra);
+const initialSpectrum = PACKS[0].spectra[0];
+const initialTarget = 50;
 const randomTarget = () => 12 + Math.floor(Math.random() * 77);
 const randomSpectrum = () => { const set = allSpectra(); return set[Math.floor(Math.random() * set.length)]; };
 function scoreGuess(needle: number, target: number) { const d = Math.abs(needle - target); return d <= 5 ? 4 : d <= 12 ? 3 : d <= 20 ? 2 : 0; }
@@ -25,11 +27,11 @@ function Dial({ needle, target, revealed, onChange, disabled }: { needle: number
 
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("lobby"), [name, setName] = useState(""), [liveRoom, setLiveRoom] = useState<RoomSnapshot | null>(null);
-  const [spectrum, setSpectrum] = useState<Spectrum>(() => randomSpectrum()), [target, setTarget] = useState(randomTarget()), [needle, setNeedle] = useState(50), [clue, setClue] = useState(""), [intercept, setIntercept] = useState<Side | null>(null);
+  const [spectrum, setSpectrum] = useState<Spectrum>(initialSpectrum), [target, setTarget] = useState(initialTarget), [needle, setNeedle] = useState(50), [clue, setClue] = useState(""), [intercept, setIntercept] = useState<Side | null>(null);
   const [scores, setScores] = useState({ amber: 0, violet: 0 }), [activeTeam, setActiveTeam] = useState<"amber" | "violet">("amber"), [notice, setNotice] = useState("Create a room or run a quick local round.");
   const liveState = (liveRoom?.game_state ?? {}) as Record<string, unknown>;
   const livePhase = liveState.phase === "reveal_pending" ? "intercept" : liveState.phase;
-  const currentPhase = (liveRoom ? livePhase : phase) as Phase;
+  const currentPhase = (liveRoom ? livePhase || "lobby" : phase) as Phase;
   const currentSpectrum = (liveRoom && liveState.spectrum ? liveState.spectrum : spectrum) as Spectrum;
   const currentTarget = typeof liveState.target === "number" ? liveState.target : target;
   const currentNeedle = typeof liveState.needle === "number" ? liveState.needle : needle;
