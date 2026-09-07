@@ -8,7 +8,7 @@ begin
   select * into v_game from public.games where slug=p_game_slug and is_published;
   if not found then raise exception 'game unavailable'; end if;
   loop
-    v_code := upper(substr(encode(gen_random_bytes(6),'hex'),1,6));
+    v_code := upper(substr(encode(extensions.gen_random_bytes(6),'hex'),1,6));
     begin
       insert into public.rooms(code,host_id,game_id,game_version,game_state) values(v_code,v_user,v_game.id,v_game.ruleset_version,'{}') returning * into v_room;
       exit;
