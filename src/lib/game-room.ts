@@ -51,6 +51,32 @@ export async function appendRoomEvent(roomId: string, eventType: string, payload
   return data;
 }
 
+async function invokeSignalRpc<T>(name: string, args: Record<string, unknown>): Promise<T> {
+  const { data, error } = await client().rpc(name, args);
+  if (error) throw error;
+  return data as T;
+}
+
+export function signalStartRound(roomId: string, spectrum: { left: string; right: string }, target: number) {
+  return invokeSignalRpc("signal_start_round", { p_room_id: roomId, p_spectrum: spectrum, p_target: target });
+}
+
+export function signalSubmitClue(roomId: string, clue: string) {
+  return invokeSignalRpc("signal_submit_clue", { p_room_id: roomId, p_clue: clue });
+}
+
+export function signalSubmitTune(roomId: string, needle: number) {
+  return invokeSignalRpc("signal_submit_tune", { p_room_id: roomId, p_needle: needle });
+}
+
+export function signalSubmitIntercept(roomId: string, intercept: "left" | "right") {
+  return invokeSignalRpc("signal_submit_intercept", { p_room_id: roomId, p_intercept: intercept });
+}
+
+export function signalRevealRound(roomId: string) {
+  return invokeSignalRpc("signal_reveal_round", { p_room_id: roomId });
+}
+
 export function subscribeToRoom(roomId: string, onUpdate: (room: RoomSnapshot) => void) {
   const db = client();
   const channel = db.channel(`room:${roomId}`).on("postgres_changes", { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${roomId}` }, (event) => onUpdate(event.new as RoomSnapshot)).subscribe();
