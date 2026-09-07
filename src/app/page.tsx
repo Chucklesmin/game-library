@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import { PACKS, type Spectrum } from "@/lib/packs";
 import { MultiplayerLobby } from "@/components/multiplayer-lobby";
 import type { RoomSnapshot } from "@/lib/game-library";
@@ -28,12 +29,11 @@ export default function Home() {
   const otherTeam = activeTeam === "amber" ? "violet" : "amber";
   const revealScore = useMemo(() => scoreGuess(needle, target), [needle, target]);
   const opponentCorrect = Boolean(intercept && revealScore !== 4 && ((target < needle && intercept === "left") || (target > needle && intercept === "right")));
-  useEffect(() => { setNeedle(50); setClue(""); setIntercept(null); }, [spectrum, target]);
   const begin = () => { if (!name.trim()) return setNotice("Add a display name first."); setPhase("clue"); setNotice(`${name.trim()} is the Signal Keeper. The target is private on this device.`); };
   const reveal = () => { setScores((s) => ({ ...s, [activeTeam]: s[activeTeam] + revealScore, [otherTeam]: s[otherTeam] + (opponentCorrect ? 1 : 0) })); setPhase("reveal"); setNotice(revealScore ? `${activeTeam === "amber" ? "Amber" : "Violet"} gains ${revealScore}.` : "No signal locked this round."); };
-  const nextTurn = () => { setActiveTeam(otherTeam); setSpectrum(randomSpectrum()); setTarget(randomTarget()); setPhase("clue"); setNotice("Switch teams and choose a new Signal Keeper."); };
-  return <main className="shell"><header className="masthead"><a className="brand" href="/">signal<span>.</span></a><div className="tag">A free, original spectrum party game</div><button className="text-button" onClick={() => setPhase("lobby")}>How it works</button></header>
-    <section className="game-layout"><aside className="sidebar"><div className="score-card"><p>FIRST TO 12</p><div className={`team amber ${activeTeam === "amber" ? "active" : ""}`}><b>AMBER</b><strong>{scores.amber}</strong></div><div className={`team violet ${activeTeam === "violet" ? "active" : ""}`}><b>VIOLET</b><strong>{scores.violet}</strong></div></div><div className="pack-card"><p>TONIGHT'S FREQUENCY</p><h3>{PACKS[0].name}</h3><span>{allSpectra().length} original spectra across {PACKS.length} packs</span></div></aside>
+  const nextTurn = () => { setActiveTeam(otherTeam); setSpectrum(randomSpectrum()); setTarget(randomTarget()); setNeedle(50); setClue(""); setIntercept(null); setPhase("clue"); setNotice("Switch teams and choose a new Signal Keeper."); };
+  return <main className="shell"><header className="masthead"><Link className="brand" href="/">signal<span>.</span></Link><div className="tag">A free, original spectrum party game</div><button className="text-button" onClick={() => setPhase("lobby")}>How it works</button></header>
+    <section className="game-layout"><aside className="sidebar"><div className="score-card"><p>FIRST TO 12</p><div className={`team amber ${activeTeam === "amber" ? "active" : ""}`}><b>AMBER</b><strong>{scores.amber}</strong></div><div className={`team violet ${activeTeam === "violet" ? "active" : ""}`}><b>VIOLET</b><strong>{scores.violet}</strong></div></div><div className="pack-card"><p>TONIGHT’S FREQUENCY</p><h3>{PACKS[0].name}</h3><span>{allSpectra().length} original spectra across {PACKS.length} packs</span></div></aside>
       <section className="board"><div className="phase"><span>{phase === "lobby" ? "READY ROOM" : phase.toUpperCase()}</span><i /></div><div className="spectrum"><span>{spectrum.left}</span><div className="spectrum-line"><i /><i /><i /><i /><i /></div><span>{spectrum.right}</span></div>
         {phase === "clue" && <div className="private-panel"><div className="eyebrow">SIGNAL KEEPER ONLY</div><Dial needle={target} target={target} revealed /><p>Think of one clue that belongs on this spectrum. Then hide the target, say the clue, and hand over the device.</p><form onSubmit={(event) => { event.preventDefault(); if (clue.trim()) { setPhase("tune"); setNotice("Team discussion begins. Signal Keeper stays quiet."); } }}><input value={clue} onChange={(event) => setClue(event.target.value)} placeholder="Your one-clue signal…" maxLength={60} /><button>Lock clue</button></form></div>}
         {phase === "tune" && <div className="play-panel"><div className="clue-bubble">“{clue}”</div><p>Discuss it. Tune the needle to the shared read of the clue.</p><Dial needle={needle} target={target} revealed={false} onChange={setNeedle} /><button onClick={() => setPhase("intercept")}>Finalize tune</button></div>}

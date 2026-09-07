@@ -10,7 +10,7 @@ type Props = { displayName: string; onRoomChange: (room: RoomSnapshot | null) =>
 export function MultiplayerLobby({ displayName, onRoomChange }: Props) {
   const [games, setGames] = useState<GameDefinition[]>([]), [gameSlug, setGameSlug] = useState("signal-spectrum"), [code, setCode] = useState(""), [room, setRoom] = useState<RoomSnapshot | null>(null), [message, setMessage] = useState("");
   useEffect(() => { if (hasSupabase) void listGames().then(setGames).catch((e: Error) => setMessage(e.message)); }, []);
-  useEffect(() => { if (!room) return; return subscribeToRoom(room.id, setRoom); }, [room?.id]);
+  useEffect(() => { if (!room?.id) return; return subscribeToRoom(room.id, setRoom); }, [room]);
   useEffect(() => onRoomChange(room), [room, onRoomChange]);
   const requireName = () => { if (!displayName.trim()) { setMessage("Choose a display name before joining a room."); return false; } return true; };
   const create = async () => { if (!requireName()) return; try { const next = await createRoom(gameSlug, displayName); setRoom(next); setMessage(`Room ${next.code} is ready to share.`); } catch (e) { setMessage(e instanceof Error ? e.message : "Could not create room."); } };
