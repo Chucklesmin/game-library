@@ -1,0 +1,7 @@
+create table public.room_events(id uuid primary key default gen_random_uuid(),room_id uuid not null references public.rooms(id) on delete cascade,actor_id uuid not null references auth.users(id),event_type text not null,payload jsonb not null default '{}'::jsonb,created_at timestamptz not null default now());
+create index room_events_room_id_created_at_idx on public.room_events(room_id,created_at);
+alter table public.room_events enable row level security;
+create policy "members read room events" on public.room_events for select to authenticated using(exists(select 1 from public.room_players p where p.room_id=room_events.room_id and p.user_id=(select auth.uid())));
+create or replace function public.append_room_event(p_room_id uuid,p_event_type text,p_payload jsonb) returns jsonb language plpgsql security definer set search_path=public,auth as $$ declare v_event public.room_events; begin if auth.uid() is null or not exists(select 1 from public.room_players where room_id=p_room_id and user_id=auth.uid()) then raise exception 'room member required';end if;insert into public.room_events(room_id,actor_id,event_type,payload) values(p_room_id,auth.uid(),p_event_type,coalesce(p_payload,'{}')) returning * into v_event;return to_jsonb(v_event);end;$$;
+revoke all on function public.append_room_event(uuid,text,jsonb) from public; grant execute on function public.append_room_event(uuid,text,jsonb) to authenticated;
+alter publication supabase_realtime add table public.room_events;

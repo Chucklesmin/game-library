@@ -45,8 +45,20 @@ export async function updateRoomState(roomId: string, status: string, state: Rec
   return data as RoomSnapshot;
 }
 
+export async function appendRoomEvent(roomId: string, eventType: string, payload: Record<string, unknown>) {
+  const { data, error } = await client().rpc("append_room_event", { p_room_id: roomId, p_event_type: eventType, p_payload: payload });
+  if (error) throw error;
+  return data;
+}
+
 export function subscribeToRoom(roomId: string, onUpdate: (room: RoomSnapshot) => void) {
   const db = client();
   const channel = db.channel(`room:${roomId}`).on("postgres_changes", { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${roomId}` }, (event) => onUpdate(event.new as RoomSnapshot)).subscribe();
+  return () => { void db.removeChannel(channel); };
+}
+
+export function subscribeToRoomEvents(roomId: string, onEvent: (event: { event_type: string; payload: Record<string, unknown>; actor_id: string }) => void) {
+  const db = client();
+  const channel = db.channel(`room-events:${roomId}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "room_events", filter: `room_id=eq.${roomId}` }, (event) => onEvent(event.new as { event_type: string; payload: Record<string, unknown>; actor_id: string })).subscribe();
   return () => { void db.removeChannel(channel); };
 }
