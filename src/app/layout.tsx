@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Signal — a free spectrum party game",
-  description: "An original, free multiplayer game about finding the frequency.",
+  title: "Game Library — play together",
+  description: "A small, growing collection of simple multiplayer games.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

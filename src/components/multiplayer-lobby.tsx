@@ -9,6 +9,7 @@ type Props = { displayName: string; onRoomChange: (room: RoomSnapshot | null) =>
 
 export function MultiplayerLobby({ displayName, onRoomChange, onRoleChange }: Props) {
   const [games, setGames] = useState<GameDefinition[]>([]), [gameSlug, setGameSlug] = useState("signal-spectrum"), [code, setCode] = useState(""), [room, setRoom] = useState<RoomSnapshot | null>(null), [message, setMessage] = useState("");
+  const playableGames = games.filter((game) => game.slug === "signal-spectrum");
   useEffect(() => { if (hasSupabase) void listGames().then(setGames).catch((e: Error) => setMessage(e.message)); }, []);
   useEffect(() => { if (!room?.id) return; return subscribeToRoom(room.id, setRoom); }, [room]);
   useEffect(() => { if (!room?.id) return; return subscribeToRoomEvents(room.id, (event) => setMessage(`Live: ${event.event_type}`)); }, [room]);
@@ -19,5 +20,5 @@ export function MultiplayerLobby({ displayName, onRoomChange, onRoleChange }: Pr
   const join = async (event: FormEvent) => { event.preventDefault(); if (!requireName()) return; try { const next = await joinRoom(code, displayName); setRoom(await getRoom(next.id)); setMessage(`Joined room ${next.code}.`); } catch (e) { setMessage(e instanceof Error ? e.message : "Could not join room."); } };
   if (!hasSupabase) return <small>Multiplayer configuration will be available when Supabase environment values are set.</small>;
   if (room) return <div className="network-room"><span className="eyebrow">ROOM CODE</span><strong>{room.code}</strong><p>{room.status === "lobby" ? "Share this code, then start the round from the board." : `Live phase: ${room.status}`}</p><small>{message}</small></div>;
-  return <div className="network-room"><label>Game<select value={gameSlug} onChange={(e) => setGameSlug(e.target.value)}>{games.map((game) => <option key={game.id} value={game.slug}>{game.name}</option>)}</select></label><button onClick={() => void create()}>Create multiplayer room</button><form onSubmit={join}><input value={code} onChange={(e) => setCode(e.target.value)} placeholder="ROOM CODE" maxLength={6} /><button>Join</button></form><small>{message || "Create a room or join friends with a code."}</small></div>;
+  return <div className="network-room"><label>Game<select value={gameSlug} onChange={(e) => setGameSlug(e.target.value)}>{playableGames.map((game) => <option key={game.id} value={game.slug}>{game.name}</option>)}</select></label><button onClick={() => void create()}>Create multiplayer room</button><form onSubmit={join}><input value={code} onChange={(e) => setCode(e.target.value)} placeholder="ROOM CODE" maxLength={6} /><button>Join</button></form><small>{message || "Create a room or join friends with a code."}</small></div>;
 }
