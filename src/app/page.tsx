@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PACKS, type Spectrum } from "@/lib/packs";
 import { MultiplayerLobby } from "@/components/multiplayer-lobby";
 import type { RoomSnapshot } from "@/lib/game-library";
-import { signalRevealRound, signalStartRound, signalSubmitClue, signalSubmitIntercept, signalSubmitTune, type CurrentRoomPlayer } from "@/lib/game-room";
+import { getCurrentRoomPlayer, signalRevealRound, signalStartRound, signalSubmitClue, signalSubmitIntercept, signalSubmitTune, subscribeToRoom, type CurrentRoomPlayer } from "@/lib/game-room";
 
 type Phase = "library" | "game" | "clue" | "tune" | "intercept" | "reveal";
 type Side = "left" | "right";
@@ -42,6 +42,9 @@ export default function Home() {
   const [phase, setPhase] = useState<Phase>("library"), [name, setName] = useState(""), [liveRoom, setLiveRoom] = useState<RoomSnapshot | null>(null), [liveRole, setLiveRole] = useState<CurrentRoomPlayer | null>(null);
   const [spectrum, setSpectrum] = useState<Spectrum>(PACKS[0].spectra[0]), [target, setTarget] = useState(50), [needle, setNeedle] = useState(50), [clue, setClue] = useState(""), [intercept, setIntercept] = useState<Side | null>(null);
   const [scores, setScores] = useState({ amber: 0, violet: 0 }), [activeTeam, setActiveTeam] = useState<"amber" | "violet">("amber"), [notice, setNotice] = useState("Choose a game, then invite your people.");
+  const liveRoomId = liveRoom?.id;
+  useEffect(() => { if (!liveRoomId) return; void getCurrentRoomPlayer(liveRoomId).then(setLiveRole).catch((error: Error) => setNotice(error.message)); }, [liveRoomId]);
+  useEffect(() => { if (!liveRoomId) return; return subscribeToRoom(liveRoomId, setLiveRoom); }, [liveRoomId]);
   const liveState = (liveRoom?.game_state ?? {}) as Record<string, unknown>;
   const livePhase = liveState.phase === "reveal_pending" ? "intercept" : liveState.phase;
   const currentPhase = (liveRoom ? livePhase === "lobby" ? "game" : livePhase || "game" : phase) as Phase;
@@ -55,10 +58,21 @@ export default function Home() {
   const begin = () => { if (!name.trim()) return setNotice("Add a display name first."); setPhase("clue"); setNotice(`${name.trim()} is the Wavelength Keeper. The target is private on this device.`); };
   const reveal = () => { setScores((score) => ({ ...score, [activeTeam]: score[activeTeam] + revealScore, [otherTeam]: score[otherTeam] + (opponentCorrect ? 1 : 0) })); setPhase("reveal"); };
   const nextTurn = () => { setActiveTeam(otherTeam); setSpectrum(randomSpectrum()); setTarget(randomTarget()); setNeedle(50); setClue(""); setIntercept(null); setPhase("clue"); };
+  const startLiveRound = () => {
+    if (!liveRoom) return;
+    const nextSpectrum = randomSpectrum(), nextTarget = randomTarget();
+    setSpectrum(nextSpectrum); setTarget(nextTarget); setNeedle(50); setClue(""); setIntercept(null);
+    void signalStartRound(liveRoom.id, nextSpectrum, nextTarget).catch((error: Error) => setNotice(error.message));
+  };
+  const copyRoomCode = async () => {
+    if (!liveRoom) return;
+    try { await navigator.clipboard.writeText(liveRoom.code); setNotice("Room code copied. Send it to your friends."); }
+    catch { setNotice(`Share room code ${liveRoom.code}.`); }
+  };
 
   if (currentPhase === "library") return <main className="library-shell"><header><Link className="brand" href="/">Game Library</Link><span>Simple games for your people.</span></header><section className="library-hero"><p className="eyebrow">PLAY TOGETHER</p><h1>Choose your game.</h1><p className="lede">Every game gets its own card. Pick one to see how you want to play.</p><div className="game-grid"><article className="game-card"><div><p className="eyebrow">READY TO PLAY</p><h2>Wavelength</h2><p>Give one clue. Find the hidden spot. Get on the same wavelength.</p><span className="game-meta">2–8 players · 15 minutes</span></div><button onClick={() => setPhase("game")}>Open Wavelength</button></article><article className="game-card coming-soon"><div><p className="eyebrow">UP NEXT</p><h2>Pulse Vote</h2><p>Make a private prediction, then see where the room lands.</p><span className="game-meta">3–8 players · coming soon</span></div><button disabled>Coming soon</button></article></div></section><footer>Game Library is free to play. No accounts, purchases, or tracking required for local games.</footer></main>;
 
-  if (currentPhase === "game") return <main className="game-shell"><header><button className="back-button" onClick={() => { setLiveRoom(null); setPhase("library"); }}>← Home</button><span className="game-title">Wavelength</span><span className="score">2–8 players</span></header><section className="game-choice"><p className="eyebrow">WAVELENGTH</p><h1>How do you want to play?</h1><p>Run a game together on one device, or make a private room and bring friends in remotely.</p><label className="name-field">Display name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Jordan" maxLength={24} /></label><div className="play-options"><article><h2>In the room</h2><p>Pass one device around and play together.</p><button onClick={begin}>Start local game</button></article><article><h2>Online</h2><p>Create a private room or join one with a code.</p><MultiplayerLobby displayName={name} gameSlug="signal-spectrum" onRoomChange={setLiveRoom} onRoleChange={setLiveRole} /></article></div><small className="notice">{notice}</small></section></main>;
+  if (currentPhase === "game") return <main className="game-shell"><header><button className="back-button" onClick={() => { setLiveRoom(null); setLiveRole(null); setPhase("library"); }}>← Home</button><span className="game-title">Wavelength</span><span className="score">2–8 players</span></header><section className="game-choice"><p className="eyebrow">WAVELENGTH</p>{liveRoom ? <><h1>Your room is ready.</h1><p>Share the code, then start when your group is here. Teams alternate each round.</p><div className="room-ready"><div><span className="eyebrow">ROOM CODE</span><strong>{liveRoom.code}</strong></div><button className="copy-button" onClick={() => void copyRoomCode()}>Copy code</button><p>{liveRole ? `${liveRole.is_keeper ? "You are the host and keeper." : "You joined the room."} You are on Team ${liveRole.team === "amber" ? "Amber" : "Violet"}.` : "Confirming your room role…"}</p>{liveRole?.is_keeper ? <button onClick={startLiveRound}>Start Wavelength</button> : <small>Waiting for the host to start the first round.</small>}</div></> : <><h1>How do you want to play?</h1><p>Run a game together on one device, or make a private room and bring friends in remotely.</p><label className="name-field">Display name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Jordan" maxLength={24} /></label><div className="play-options"><article><h2>In the room</h2><p>Pass one device around and play together.</p><button onClick={begin}>Start local game</button></article><article><h2>Online</h2><p>Create a private room or join one with a code.</p><MultiplayerLobby displayName={name} gameSlug="signal-spectrum" onRoomChange={setLiveRoom} onRoleChange={setLiveRole} /></article></div></>}<small className="notice">{notice}</small></section></main>;
 
   return <main className="game-shell"><header><button className="back-button" onClick={() => { setLiveRoom(null); setPhase("library"); }}>← Home</button><span className="game-title">Wavelength</span><span className="score">Amber {currentScores.amber} · Violet {currentScores.violet}</span></header><section className="game-board"><div className="spectrum"><span>{currentSpectrum.left}</span><div /><span>{currentSpectrum.right}</span></div>
     {currentPhase === "clue" && (liveRoom && !liveRole?.is_keeper ? <div className="panel"><p className="eyebrow">KEEPER&apos;S TURN</p><h1>Listen closely.</h1><p>The keeper is choosing a clue. The target stays private until the reveal.</p></div> : <div className="panel"><p className="eyebrow">KEEPER ONLY</p><Dial needle={target} target={target} revealed /><p>Think of one clue, share it, then pass the device.</p><form onSubmit={(event) => { event.preventDefault(); if (!clue.trim()) return; if (liveRoom) void signalSubmitClue(liveRoom.id, clue).then(() => setNotice("Clue locked for the room.")).catch((error: Error) => setNotice(error.message)); else setPhase("tune"); }}><input value={clue} onChange={(event) => setClue(event.target.value)} placeholder="Your clue" maxLength={60} /><button>Lock clue</button></form></div>)}
