@@ -35,18 +35,18 @@ export async function joinRoom(code: string, displayName: string) {
 }
 
 export async function getRoom(roomId: string): Promise<RoomSnapshot> {
-  const { data, error } = await client().from("rooms").select("id,code,status,game_id,game_version,game_state,active_team,amber_score,violet_score").eq("id", roomId).single();
+  const { data, error } = await client().from("rooms").select("id,code,status,game_id,game_version,game_state,group_score").eq("id", roomId).single();
   if (error) throw error;
   return data as RoomSnapshot;
 }
 
-export type CurrentRoomPlayer = { team: "amber" | "violet"; is_keeper: boolean };
+export type CurrentRoomPlayer = { userId: string };
 
 export async function getCurrentRoomPlayer(roomId: string): Promise<CurrentRoomPlayer> {
   const user = await ensureGuest();
-  const { data, error } = await client().from("room_players").select("team,is_keeper").eq("room_id", roomId).eq("user_id", user.id).single();
+  const { data, error } = await client().from("room_players").select("user_id").eq("room_id", roomId).eq("user_id", user.id).single();
   if (error) throw error;
-  return data as CurrentRoomPlayer;
+  return { userId: data.user_id } as CurrentRoomPlayer;
 }
 
 export async function updateRoomState(roomId: string, status: string, state: Record<string, unknown>) {
@@ -67,24 +67,20 @@ async function invokeSignalRpc<T>(name: string, args: Record<string, unknown>): 
   return data as T;
 }
 
-export function signalStartRound(roomId: string, spectrum: { left: string; right: string }, target: number) {
-  return invokeSignalRpc("signal_start_round", { p_room_id: roomId, p_spectrum: spectrum, p_target: target });
+export function wavelengthStartRound(roomId: string) {
+  return invokeSignalRpc("wavelength_start_round", { p_room_id: roomId });
 }
 
-export function signalSubmitClue(roomId: string, clue: string) {
-  return invokeSignalRpc("signal_submit_clue", { p_room_id: roomId, p_clue: clue });
+export function wavelengthSubmitClue(roomId: string, spectrum: { left: string; right: string }, target: number, clue: string) {
+  return invokeSignalRpc("wavelength_submit_clue", { p_room_id: roomId, p_spectrum: spectrum, p_target: target, p_clue: clue });
 }
 
-export function signalSubmitTune(roomId: string, needle: number) {
-  return invokeSignalRpc("signal_submit_tune", { p_room_id: roomId, p_needle: needle });
+export function wavelengthSubmitTune(roomId: string, needle: number) {
+  return invokeSignalRpc("wavelength_submit_tune", { p_room_id: roomId, p_needle: needle });
 }
 
-export function signalSubmitIntercept(roomId: string, intercept: "left" | "right") {
-  return invokeSignalRpc("signal_submit_intercept", { p_room_id: roomId, p_intercept: intercept });
-}
-
-export function signalRevealRound(roomId: string) {
-  return invokeSignalRpc("signal_reveal_round", { p_room_id: roomId });
+export function wavelengthRevealRound(roomId: string) {
+  return invokeSignalRpc("wavelength_reveal_round", { p_room_id: roomId });
 }
 
 export function subscribeToRoom(roomId: string, onUpdate: (room: RoomSnapshot) => void) {
