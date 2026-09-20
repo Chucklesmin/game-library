@@ -193,3 +193,5 @@ export const PACKS:Pack[]=[
  {id:"afterdark",name:"After Dark",emoji:"🌙",spectra:p("afterdark","Dance floor|Corner booth~Late dinner|Early dessert~Rooftop|Basement~Mocktail|Cocktail~Live DJ|Live band~Dress up|Comfortable~Stay out|Head home~Night drive|Night walk~Neon|Candlelight~Secrets|Stories~First date|Long-time love~Laugh loud|Speak low~Big gesture|Small detail~Busy bar|Quiet lounge~Spontaneous night|Quiet night~Dessert bar|Coffee shop~Movie night|Game night~City lights|Star lights~Last call|First train~Deep talk|Dumb jokes~Crowded room|Empty room~Mystery|Romance~Slow song|Fast song~Capture it|Live in it~Flirt|Tease~Fancy|Casual~Stay in|Go out~Midnight snack|Sunrise breakfast~Last one out|Leave on a high~New connection|Familiar comfort" )},
  {id:"naughty",name:"Naughty & Nice",emoji:"🍒",spectra:p("naughty",naughtyCards)}
 ];
+export const ALL_PACK_ID="all";
+export const ALL_PACK:Pack={id:ALL_PACK_ID,name:"All Cards",emoji:"✦",spectra:PACKS.flatMap((pack)=>pack.spectra)};

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { PACKS, type Pack, type Spectrum } from "@/lib/packs";
+import { ALL_PACK, ALL_PACK_ID, PACKS, type Pack, type Spectrum } from "@/lib/packs";
 import { MultiplayerLobby } from "@/components/multiplayer-lobby";
 import type { RoomSnapshot } from "@/lib/game-library";
 import { createWavelengthPreviewPublisher, getCurrentRoomPlayer, getCurrentWavelengthRound, listRoomPlayers, subscribeToRoom, subscribeToRoomPlayers, subscribeToWavelengthPreviews, wavelengthRevealRound, wavelengthStartGame, wavelengthStartRound, wavelengthSubmitClue, wavelengthSubmitTune, wavelengthTimeoutPhase, type CurrentRoomPlayer, type RoomPlayer, type WavelengthPreview } from "@/lib/game-room";
@@ -13,7 +13,7 @@ type DialMarker = { id: string; label: string; value: number };
 const clamp = (value: number) => Math.max(0, Math.min(100, value));
 const randomTarget = () => 12 + Math.floor(Math.random() * 77);
 const scoreGuess = (needle: number, target: number) => { const distance = Math.abs(needle - target); return distance <= 5 ? 4 : distance <= 12 ? 3 : distance <= 20 ? 2 : 0; };
-const getPack = (id: string) => PACKS.find((pack) => pack.id === id) ?? PACKS[0];
+const getPack = (id: string) => id === ALL_PACK_ID ? ALL_PACK : PACKS.find((pack) => pack.id === id) ?? PACKS[0];
 const randomSpectrum = (pack: Pack, usedIds: string[]) => { const eligible = pack.spectra.filter((item) => !usedIds.includes(item.id)); const choices = eligible.length ? eligible : pack.spectra; return choices[Math.floor(Math.random() * choices.length)]; };
 
 function pointOnArc(value: number, radius = 156) { const angle = Math.PI - (Math.PI * value) / 100; return { x: 200 + radius * Math.cos(angle), y: 190 - radius * Math.sin(angle) }; }
@@ -23,7 +23,7 @@ function Dial({ needle, target, revealed, onChange, onCommit, markers = [] }: { 
 }
 function GameSetup({ selectedPackId, totalRounds, onPackChange, onRoundsChange, onStart, startLabel, disabled = false }: { selectedPackId: string; totalRounds: number; onPackChange: (packId: string) => void; onRoundsChange: (rounds: number) => void; onStart: () => void; startLabel: string; disabled?: boolean; }) {
   const pack = getPack(selectedPackId), maximum = Math.min(20, pack.spectra.length);
-  return <section className="game-setup" aria-label="Wavelength game setup"><label>Prompt pack<select value={selectedPackId} onChange={(event) => onPackChange(event.target.value)} disabled={disabled}>{PACKS.map((item) => <option key={item.id} value={item.id}>{item.emoji} {item.name}</option>)}</select></label>{pack.id === "naughty" && <p className="pack-note">Adults only · flirty prompts for consenting adults.</p>}<label>Number of rounds<select value={Math.min(totalRounds, maximum)} onChange={(event) => onRoundsChange(Number(event.target.value))} disabled={disabled}>{Array.from({ length: maximum }, (_, index) => index + 1).map((round) => <option key={round} value={round}>{round}</option>)}</select></label><p>{pack.spectra.length} tagged questions available in {pack.name}.</p><button onClick={onStart} disabled={disabled}>{startLabel}</button></section>;
+  return <section className="game-setup" aria-label="Wavelength game setup"><label>Prompt pack<select value={selectedPackId} onChange={(event) => onPackChange(event.target.value)} disabled={disabled}><option value={ALL_PACK_ID}>{ALL_PACK.emoji} {ALL_PACK.name}</option>{PACKS.map((item) => <option key={item.id} value={item.id}>{item.emoji} {item.name}</option>)}</select></label>{pack.id === "naughty" && <p className="pack-note">Adults only · flirty prompts for consenting adults.</p>}<label>Number of rounds<select value={Math.min(totalRounds, maximum)} onChange={(event) => onRoundsChange(Number(event.target.value))} disabled={disabled}>{Array.from({ length: maximum }, (_, index) => index + 1).map((round) => <option key={round} value={round}>{round}</option>)}</select></label><p>{pack.spectra.length} tagged questions available across {pack.name}.</p><button onClick={onStart} disabled={disabled}>{startLabel}</button></section>;
 }
 
 export default function Home() {
