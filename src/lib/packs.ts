@@ -1,7 +1,185 @@
 export type Spectrum={id:string;left:string;right:string;tags:string[]};export type Pack={id:string;name:string;emoji:string;spectra:Spectrum[]};
-const naughtyExtra="First toast|Last toast~Soft smile|Crooked smile~Favorite place|New place~Handwritten card|Unexpected text~Slow reveal|Big reveal~City lights|Porch lights~Rain check|Make it happen~Casual date|Dressy date~Stay curious|Stay close~Funny story|Serious story~Warm coffee|Cold champagne~Neon sign|Candle glow~Good chemistry|Great timing~Late walk|Long drive~Quiet room|Loud room~Sweet compliment|Bold compliment~Stolen moment|Planned moment~Just us|Bring friends~Slow goodbye|See you soon";
-const naughtyExtraMore="Sunset drinks|Sunrise coffee~Sweet escape|Stay awhile~Flirty hello|Warm welcome~Close conversation|Shared silence~A little closer|Right beside me~Big feelings|Small details~Birthday kiss|Anniversary dance~Weekend bag|Overnight plans~Smile first|Speak first~Sweet ending|New beginning~Slow tease|Sweet release~Golden promise|Midnight wish~Close friends|Closer lovers~Quiet confidence|Open heart";
-const p=(packId:string,x:string)=>(x+(packId==="naughty"?"~"+naughtyExtra+"~"+naughtyExtraMore+"~Soft landing|Sweet escape~Late spark|Early glow~One more song|One more kiss~Warm goodbye|See you soon":"")).split("~").map((v,index)=>{const[left,rawRight]=v.split("|");const right=rawRight||(left==="Midnight drive"?"Sunrise drive":"Dawn drive");return{id:packId+"-"+String(index+1).padStart(2,"0"),left,right,tags:[packId]}});
+const naughtyCards=`
+Play it cool|Make the first move
+Cheeky text|Send a risky photo
+Slow dance|Dance against me
+Eye contact|Lip bite
+Kiss hello|Kiss goodbye
+Sweet compliment|Dirty compliment
+Hold hands|Hold me closer
+First date|Last call
+Romantic dinner|Midnight rendezvous
+Flirt across the room|Pull me into a corner
+Secret crush|Open invitation
+Stay in|Sneak out together
+Champagne toast|Champagne shower
+Love song|Bedroom playlist
+Candlelight|Lights off
+Soft smile|Hungry stare
+Playful dare|Private challenge
+Long look|Slow undress
+Voice note|Breathy voicemail
+Goodnight kiss|Do not let me sleep
+Handwritten note|Lipstick message
+Cute nickname|Name whispered slowly
+First move|Take control
+Shy grin|Confident smirk
+Brush my hand|Trace my skin
+Sit beside me|Sit on my lap
+Leave space|Close the distance
+Ask nicely|Tell me what you want
+Keep it sweet|Make it filthy
+One more drink|One more kiss
+Favorite outfit|Nothing but confidence
+Silk blouse|Open shirt
+Little black dress|Red-hot lingerie
+Buttoned collar|Loose tie
+High heels|Bare feet
+Fresh sheets|Rumpled sheets
+Perfume|Scent on my pillow
+Lip gloss|Lipstick on my neck
+Soft robe|Borrowed shirt
+Elegant updo|Messy hair
+New underwear|Something lacy
+Suit and tie|Shirt on the floor
+Favorite sweater|No sweater at all
+Raincoat|Rain-soaked clothes
+Morning coffee|Morning temptation
+Hotel lobby|Hotel room
+Corner booth|Back booth
+Rooftop drinks|Balcony after dark
+Guest room|Master bedroom
+Locked door|Do not disturb
+Window seat|Fogged-up window
+Warm bath|Shared shower
+Candlelit tub|Steamy mirror
+Slow morning|No sleep tonight
+Early checkout|Late checkout
+Private balcony|Private balcony door
+City lights|Curtains closed
+Quiet hotel|Thin hotel walls
+Room service|Midnight snack in bed
+Fresh towels|Towel drop
+Weekend away|One-night escape
+Pack light|Pack something daring
+Road trip|Pulled-over kiss
+Beach walk|Beach after dark
+Poolside drink|Poolside secret
+Cabin fireplace|Cabin bedroom
+Tent camping|Sleeping bag for two
+Late-night drive|Park somewhere quiet
+Backseat conversation|Backseat distraction
+The spare key|The locked suite
+Elevator glance|Elevator corner
+Stairwell kiss|Rooftop rendezvous
+Parking-lot goodbye|Drive home together
+Last train|First train
+Midnight snack|Midnight feast
+Order dessert|Feed me dessert
+Share a straw|Share a secret
+One bite|One taste
+Cherry on top|Cherry between us
+Chocolate fondue|Chocolate on skin
+Whipped cream|No napkins
+Red wine|Wine on the sheets
+Sparkling water|Spiked punch
+Sweet tooth|Dangerous appetite
+Kitchen dance|Kitchen counter
+Cooking together|Distracting the chef
+Apron strings|Untied apron
+Flour on my nose|Hands on my waist
+Dish duty|Shower duty
+Movie night|Skip the movie
+Rom-com|Steamy thriller
+Shared blanket|Shared heat
+Couch cuddle|Couch make-out
+Remote control|No distractions
+Pause the movie|Turn off the screen
+Whispered clue|Whispered fantasy
+Inside joke|Private code
+Secret signal|Open invitation
+Text me later|Come over now
+Typing bubbles|Photo attachment
+Read receipt|Seen at midnight
+Good morning text|Come back to bed
+Voice call|Video call
+Flirty meme|Flirty selfie
+Delete the chat|Save the chat
+Heart emoji|Eggplant emoji
+Kiss mark|Fingerprints
+One line of lipstick|A whole trail of lipstick
+Neck kiss|Neck kisses
+Forehead kiss|Kiss everywhere else
+Slow kiss|Breathless kiss
+Peck on the cheek|Kiss me properly
+Hands above the waist|Hands with permission
+Fingers intertwined|Fingers wandering
+Arm around me|Pull me in
+Back rub|Massage oil
+Shoulder rub|Lower back touch
+Hair brush|Hair tug
+Whisper in my ear|Talk dirty to me
+Call me beautiful|Call me irresistible
+Make me laugh|Make me blush
+Keep me guessing|Tell me exactly
+Ask permission|Give permission
+Green light|Red-hot light
+Safe word|Safeword check-in
+Playful teasing|Relentless teasing
+Slow burn|No patience
+Take your time|Do not make me wait
+One kiss|Keep going
+Almost kiss|Finally kiss
+Close call|Caught staring
+Doorbell rings|Ignore the doorbell
+Neighbors nearby|No one can hear us
+Public flirt|Private scandal
+Restaurant table|Under the table
+Dance floor|Dark hallway
+Office crush|After-hours office
+Work trip|Work trip with benefits
+Friends with chemistry|Friends with benefits
+Old flame|New temptation
+Second date|One-night mistake
+Dating app match|Match in person
+Stranger at the bar|Regular at the bar
+Mystery guest|Familiar lover
+Roleplay|Stay in character
+Costume party|Costume comes off
+Truth or dare|Dare with consequences
+Never have I ever|Tell me everything
+Would you rather|You choose
+Blindfold|Trust me
+Handcuffs|Hands above your head
+Silk tie|Tied to the bedpost
+Feather tease|Fingertip tease
+Ice cube|Warm breath
+Scented candle|Melted wax
+Music low|Music off
+Lights dim|Lights out
+Mirror glance|Watch us
+Camera shy|Polaroid proof
+Keep it private|Leave a souvenir
+One secret|No secrets tonight
+Sweet talk|Dirty talk
+Romantic fantasy|Naughty fantasy
+Take the lead|Give up control
+Switch roles|Stay in charge
+Slow tease|Strip tease
+Fully dressed|Barely dressed
+Under the covers|On top of the covers
+Good behavior|Very bad behavior
+Be good|Make me behave
+Kiss and tell|Never tell
+Morning after|No regrets
+Stay for breakfast|Stay until dinner
+One more night|Move in tonight
+Close friends|Closer lovers
+Soft landing|Worth the trouble
+Late spark|Full blaze
+See you soon|Do not leave yet
+`.trim();
+const p=(packId:string,x:string)=>(packId==="naughty"?naughtyCards:x).split(/[~\n]+/).map((v,index)=>{const[left,rawRight]=v.split("|").map((part)=>part.trim());const right=rawRight||(left==="Midnight drive"?"Sunrise drive":"Dawn drive");return{id:packId+"-"+String(index+1).padStart(2,"0"),left,right,tags:[packId]}});
 export const PACKS:Pack[]=[
  {id:"daily",name:"Daily Signals",emoji:"☀️",spectra:p("daily","Wake early|Sleep in~Homemade|Takeout~Text it|Call it~Spontaneous|Planned~Window seat|Aisle seat~Hot coffee|Iced coffee~City walk|Nature walk~Early|Fashionably late~Notebook|Notes app~Sweet snack|Salty snack~Library|Bookstore~Morning shower|Night shower~One trip|Many trips~Rewatch|Try new~Shoes on|Shoes off~Calendar full|Calendar open~Phone camera|Film camera~Dine in|Picnic~Long playlist|One album~Talk it out|Think it through~Minimalist|Maximalist~Big group|One-on-one~Buy it|Borrow it~Sunrise|Sunset~Workout solo|Workout class~House party|Going out~Fast reply|Thoughtful reply~Clean now|Clean later~Early bird|Night owl~Routine|Surprise" )},
  {id:"culture",name:"Culture Club",emoji:"🎬",spectra:p("culture","Cult classic|Blockbuster~Book first|Screen first~Serious|Silly~Comfort watch|Challenge watch~Live music|Studio recording~Plot|Character~Museum|Concert~Subtitles on|Subtitles off~Slow burn|Instant hook~Classic|Contemporary~Indie|Mainstream~Reboot|Original~Solo artist|Ensemble~Jukebox|Algorithm~Theater|Couch~Fiction|Documentary~Binge|Weekly~Lyrics|Melody~Trailer avoider|Trailer watcher~Film grain|Digital polish~Hero|Antihero~Happy ending|Ambiguous ending~Poetry|Prose~Broadway|Basement show~Vintage|Futuristic~Spooky|Cozy~Meme|Quote~Cover|Original~Drama|Comedy~Thought-provoking|Pure fun" )},
@@ -13,5 +191,5 @@ export const PACKS:Pack[]=[
  {id:"wild",name:"Wild Cards",emoji:"🪐",spectra:p("wild","Useful power|Fun power~Dragon|Giant robot~Past travel|Future travel~Teleport|Fly~Mermaid|Astronaut~Secret lair|Treehouse~Alien friend|Ghost friend~Magic wand|Magic book~Talking animal|Tiny dinosaur~Strength|Speed~Underwater city|Sky city~Moon base|Jungle temple~Invisible|Mind reading~Treasure map|Mystery door~Cursed item|Lucky charm~Storm chaser|Deep diver~Space opera|Fairy tale~Portal|Puzzle box~Robot butler|Dragon chauffeur~Giant library|Giant kitchen~Winter forever|Summer forever~Perfect day|Surprise adventure~Glowing forest|Crystal cave~Wizard duel|Dance battle~Friendly monster|Mischief fairy~Ancient ruins|Future ruins~Cloud castle|Underground city~Magic mirror|Magic compass~One careful wish|One bold wish" )},
  {id:"work",name:"Work & Play",emoji:"🎯",spectra:p("work","Deep focus|Quick wins~Brainstorm|Execute~List|Wing it~Big picture|Detail~Office|Café~Early start|Late sprint~One task|Multitask~Sketch|Build~Immediate feedback|Time to reflect~Solo|Co-create~Presentation|Spreadsheet~Sticky notes|Whiteboard~Deadline|Inspiration~Promotion|Freedom~Long hours|Better systems~Inbox zero|Search later~Shortcut|Best practice~Prototype|Polish~Practice|Improvise~Expertise|Curiosity~Ambition|Balance~Mentor|Peer~Remote|In person~Meeting|Async~Perfect|Shipped~Plan ahead|Adapt as you go~Calendar block|To-do list~Sprint|Marathon~Idea|Execution" )},
  {id:"afterdark",name:"After Dark",emoji:"🌙",spectra:p("afterdark","Dance floor|Corner booth~Late dinner|Early dessert~Rooftop|Basement~Mocktail|Cocktail~Live DJ|Live band~Dress up|Comfortable~Stay out|Head home~Night drive|Night walk~Neon|Candlelight~Secrets|Stories~First date|Long-time love~Laugh loud|Speak low~Big gesture|Small detail~Busy bar|Quiet lounge~Spontaneous night|Quiet night~Dessert bar|Coffee shop~Movie night|Game night~City lights|Star lights~Last call|First train~Deep talk|Dumb jokes~Crowded room|Empty room~Mystery|Romance~Slow song|Fast song~Capture it|Live in it~Flirt|Tease~Fancy|Casual~Stay in|Go out~Midnight snack|Sunrise breakfast~Last one out|Leave on a high~New connection|Familiar comfort" )},
- {id:"naughty",name:"Naughty & Nice",emoji:"🍒",spectra:p("naughty","Play it cool|Make the first move~Cheeky text|Sweet note~Slow dance|Dance floor~Eye contact|Playful banter~Kiss at midnight|Breakfast in bed~Silk sheets|Soft hoodie~Love song|Late-night playlist~Candlelight|Neon lights~Flirt|Tease~Secret crush|Open invitation~Stay in|Sneak out~Champagne|Chocolate~Romantic comedy|Steamy thriller~Handwritten note|Voice message~Dress up|Dress down~First date nerves|Long-time chemistry~Bold compliment|Subtle hint~Rooftop view|Backseat conversation~Slow burn|Instant spark~Dinner date|Dessert date~Fancy hotel|Cozy cabin~Last call|Sunrise~Take the lead|Go with the flow~Shared secret|Public display~Velvet jacket|Bare shoulders~Love bite|Lip gloss~Midnight confession|Morning grin~Bedroom eyes|Innocent smile~Hands held|Hands wandering~Playful dare|Private promise~Champagne toast|Stolen sip~Red lipstick|Messy hair~Slow kiss|Quick kiss~Phone off|Do not disturb~Late checkout|Early arrival~Private booth|Dance floor spotlight~Whispered secret|Laughing fit~Soft touch|Warm embrace~Sugar rush|Nightcap~Date night|Weekend away~Open collar|Favorite sweater~Perfume trail|Fresh sheets~Golden hour|Blue hour~Hotel bar|Corner table~Cocktail dress|White T-shirt~Rose petals|City rain~Moonlight walk|Sunset drive~Midnight drive~Necklace clasp|Loose tie~First blush|Deep blush~Sweet talk|Dirty joke~Love letter|Flirty playlist~Slow song|Fast heartbeat~Close call|Safe word~Eyes closed|Eyes open~Satin robe|Cotton tee~After-party|Before dawn~Confident move|Shy smile~Bold question|Quiet answer~Dinner for two|Room service~Long look|Quick glance~Secret signal|Open secret~Hand on knee|Arm around waist~Private dance|Public toast~Text me later|Call me now~Candles lit|Lights low~High heels|Bare feet~Side by side|Face to face~Sweet escape|Wild weekend~Gentle tease|Brave confession~Shared dessert|One spoon~Late movie|Early movie~Window fog|Fresh air~Rooftop kiss|Lobby kiss~Favorite scent|Fresh cologne~Lace detail|Leather jacket~Stay a while|Leave them wanting~Slow morning|Busy night~Soft music|No music~Close enough|Even closer~Perfect timing|Right now~Hidden corner|Center stage~Love at first sight|Love that grows~Weekend plans|No plans~Dinner reservations|Kitchen dancing~Cute nickname|Real name~Long goodbye|One more minute~First message|Last message~Sweet dreams|Good morning~Playful chase|Easy connection~Romantic gesture|Unexpected spark~Lucky charm|Lucky kiss~Private joke|Shared fantasy~Candle wax|Warm blanket~Soft landing|Hard to leave~Sunday morning|Saturday night~Secret menu|Chef's choice~Dance lesson|Dance break~Open window|Closed door~Warm rain|Cool sheets~Slow exhale|Quick laugh~Flirty photo|Polaroid memory~Red wine|Sparkling water~Hold me close|Give me space~Late reservation|Walk-in table~Careful plan|Happy accident~Sweet surprise|Bold surprise~Love language|Body language~One last drink|One last dance~New crush|Old flame~Heart racing|Heart steady~Top button|Open collar~Under the stars|Under the covers" )}
+ {id:"naughty",name:"Naughty & Nice",emoji:"🍒",spectra:p("naughty",naughtyCards)}
 ];

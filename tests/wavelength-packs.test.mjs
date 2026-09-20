@@ -27,7 +27,8 @@ test("every Wavelength question has a unique id, two usable sides, and its pack 
       ids.add(question.id);
     }
   }
-  assert.equal(ids.size, 444);
+  assert.equal(ids.size, 472);
+  assert.equal(packs.find((pack) => pack.id === "naughty").spectra.length, 178);
 });
 
 test("the database seed matches the selectable packs and writes pack tags", () => {
