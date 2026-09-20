@@ -36,6 +36,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local browser and Supabase scratch artifacts
+/.playwright-cli/
+/supabase/.temp/
+/wavelength-dial.png
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
