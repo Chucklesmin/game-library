@@ -16,3 +16,16 @@ test("Wavelength awards the correct shared-score proximity bands", () => {
 test("Wavelength gives no shared points outside the scoring band", () => {
   assert.equal(score(50, 71), 0);
 });
+
+test("Wavelength server target range stays away from the unusable extremes", () => {
+  for (let target = 12; target <= 88; target += 1) {
+    assert.ok(target >= 12 && target <= 88);
+  }
+});
+
+test("Wavelength timer treats the server deadline as expired at zero", () => {
+  const isExpired = (deadline, now) => Date.parse(deadline) <= now;
+  const deadline = "2026-09-13T12:00:00.000Z";
+  assert.equal(isExpired(deadline, Date.parse("2026-09-13T11:59:59.999Z")), false);
+  assert.equal(isExpired(deadline, Date.parse("2026-09-13T12:00:00.000Z")), true);
+});

@@ -1,14 +1,16 @@
 # Game Library
 
-Game Library is a free, non-commercial game library. Its first game is **Wavelength**, a spectrum party game with 10 packs and 300 spectra. A second adapter, **Pulse Vote**, demonstrates a different prompt → private vote → results loop on the same room/catalog foundation.
+Game Library is a free, non-commercial game library. Its first game is **Wavelength**, a spectrum party game with 11 packs and 318 tagged spectra, including the adults-only Naughty & Nice pack. A second adapter, **Pulse Vote**, demonstrates a different prompt → private vote → results loop on the same room/catalog foundation.
 
 ## Library architecture
 
 The database has a generic `games → game_packs → game_content` catalog. A room records its selected game, immutable ruleset version, and game-specific state, allowing future games to use entirely different turn logic without altering room identity, membership, or realtime delivery. Wavelength's live actions use database RPCs, so targets remain in the protected round record until scoring reveals them.
 
-## Rules
+## Wavelength rules
 
-One Wavelength Keeper privately sees a target on a continuum and gives one clue. Their team tunes a shared needle. The other team predicts whether the target is left or right. Reveal scores 4 / 3 / 2 by proximity; a correct intercept earns opponents 1 (except on a perfect center hit). First to 12 wins.
+Wavelength is cooperative. One rotating Keeper privately sees a target on a continuum and gives one clue. Everyone else discusses the clue and locks one shared dial position. Reveal scores the group 4 / 3 / 2 points by proximity, or 0 outside the scoring band. The Keeper rotates by join order between rounds, and the room keeps one shared score.
+
+The local mode needs no account or network connection. The online mode uses a private six-character room code, anonymous guest sessions, realtime room updates, and server-authoritative Supabase RPCs so the target stays private until reveal.
 
 ## Development
 

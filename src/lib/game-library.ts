@@ -11,6 +11,7 @@ export type GameDefinition = {
 export type RoomSnapshot = {
   id: string;
   code: string;
+  host_id: string;
   status: string;
   game_id: string;
   game_version: number;
