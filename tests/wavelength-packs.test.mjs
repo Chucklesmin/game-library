@@ -28,7 +28,7 @@ test("every Wavelength question has a unique id, two usable sides, and its pack 
     }
   }
   assert.equal(ids.size, 469);
-  assert.equal(packs.find((pack) => pack.id === "naughty").spectra.length, 175);
+  assert.equal(packs.find((pack) => pack.id === "naughty").spectra.length, 176);
 });
 
 test("the database seed matches the selectable packs and writes pack tags", () => {
@@ -39,5 +39,6 @@ test("the database seed matches the selectable packs and writes pack tags", () =
   for (const pack of packs.filter((pack) => pack.id !== "naughty")) { const actual = (seeded.get(pack.id) ?? []).filter((card) => { const [left, right] = card.toLowerCase().split("|"); return left !== right && !left.includes(right) && !right.includes(left); }); assert.ok(actual.length >= 20, pack.id + " seed must retain enough strict cards"); }
   assert.match(migration, /insert into public\.wavelength_question_tags/);
 });
+
 
 
