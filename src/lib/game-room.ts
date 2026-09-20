@@ -111,6 +111,12 @@ export function subscribeToRoom(roomId: string, onUpdate: (room: RoomSnapshot) =
   return () => { void db.removeChannel(channel); };
 }
 
+export function subscribeToRoomPlayers(roomId: string, onUpdate: (players: RoomPlayer[]) => void) {
+  const db = client();
+  const channel = db.channel(`room-players:${roomId}`).on("postgres_changes", { event: "*", schema: "public", table: "room_players", filter: `room_id=eq.${roomId}` }, () => { void listRoomPlayers(roomId).then(onUpdate); }).subscribe();
+  return () => { void db.removeChannel(channel); };
+}
+
 export function subscribeToRoomEvents(roomId: string, onEvent: (event: { event_type: string; payload: Record<string, unknown>; actor_id: string }) => void) {
   const db = client();
   const channel = db.channel(`room-events:${roomId}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "room_events", filter: `room_id=eq.${roomId}` }, (event) => onEvent(event.new as { event_type: string; payload: Record<string, unknown>; actor_id: string })).subscribe();
