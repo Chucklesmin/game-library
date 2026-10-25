@@ -33,11 +33,11 @@ Choose explicit participants and private database jobs over fake bot user accoun
 | BP-01 | Baseline/contracts/plan; primary | source and instructions read | existing files preserved, interface contracts recorded, goal active | verified |
 | BP-02 | 250/500 deck and editorial record; content role | scope | exact counts, unique IDs/text, one-blank prompts, category counts, semantic review and fact sources | verified |
 | BP-03 | Participant/hand/phase/judge SQL; backend role | contracts | fresh local migrations, private-hand and unauthorized-action checks, production seed/RLS and live game | verified |
-| BP-04 | NVIDIA adapter, worker, durable wake/recovery; primary | job contract | mock/error tests, malformed IDs/scores, timeout/refusal/429/restart/stale and duplicate-work checks; NVIDIA key remains missing | active |
+| BP-04 | NVIDIA adapter, worker, durable wake/recovery; primary | job contract | mock/error tests, malformed IDs/scores, timeout/refusal/429/restart/stale and duplicate-work checks; live production player and judge inference | verified |
 | BP-05 | Local/online interface; UI role | view contract + deck | solo/mixed/legacy games, mobile/desktop, keyboard, no secret/hand leaks | verified |
-| BP-06 | Integrated acceptance; primary/review | BP-02..05 | lint/typecheck/tests/build, DB integration and browser games pass; live NVIDIA inference awaits secret | pending provider configuration |
-| BP-07 | Main and production release; primary | BP-06 + live gates | main `dfd06f2` pushed; migrations and worker deployed; Vercel `dpl_GViAYmhxntyGgwsFq3G3yNPHtKeo` READY; production three-round game passed in disclosed fallback mode | release deployed; AI inference pending |
-| BP-08 | Handoff/runbook/Brain; primary | verified milestones | operations runbook added; record live-provider gate and current evidence | active |
+| BP-06 | Integrated acceptance; primary/review | BP-02..05 | lint/typecheck/tests/build, DB integration and browser games pass; live NVIDIA inference recorded below | verified |
+| BP-07 | Main and production release; primary | BP-06 + live gates | live NVIDIA player/judge acceptance passed; Supabase migration and worker v4 active; latest main commit and Vercel production deployment verified below | verified |
+| BP-08 | Handoff/runbook/Brain; primary | verified milestones | operations runbook includes deck and NVIDIA maintenance; project and Brain records updated | verified |
 
 Critical dependencies: BP-02 seeds BP-03 and BP-05; BP-03 supplies BP-04 and BP-05; all feed BP-06, then BP-07. Content and interface work proceed while credential testing is deferred.
 
@@ -106,3 +106,10 @@ Sources: https://docs.api.nvidia.com/nim/reference/llm-apis ; https://forums.dev
 - Release: commits `6daf89c` (Supabase deck runtime and model replacement) and `e9940d1` (bounded judge timeout) are pushed to `main`. Vercel production deployment `dpl_Dri37ZiW4YJKoqf3nKGCm6n6bodu` is READY and aliased to `signal-party.vercel.app`. Supabase migration `20261025153031` is applied; `cah-ai-worker` version 4 is ACTIVE.
 - Verification: `npm test` 28/28, `npm run typecheck`, `npm run build`, and `git diff --check` passed. Production browser console had no errors. Lint was inconclusive because it produced no output and was interrupted; no lint pass is claimed.
 - Remaining: no provider gate remains. Keep the timeout/fallback behavior and the deck counts in post-release smoke checks.
+
+## Follow-up closeout — 2026-10-25
+
+- Lint: `npm run lint -- --max-warnings=0` exited 0; no lint fix was needed.
+- Synthetic QA cleanup: removed only rooms `2A2E02` (fallback/recovery run) and `D5FD3C` (successful NVIDIA run), after confirming both belonged to Cards Against Humanity and contained the expected bot/submission data. The separate room `43C680` was left untouched. Room deletion cascaded to its associated game state.
+- Maintenance: `docs/cah-operations.md` now documents the actual player/judge timeouts, the Supabase deck update/validation workflow, and the live NVIDIA model-change acceptance procedure.
+- Release follow-through: these documentation changes are included in the current main push and Vercel deployment; no schema or worker change was needed for cleanup or the runbook.
