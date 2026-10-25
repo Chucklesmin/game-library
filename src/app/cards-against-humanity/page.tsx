@@ -211,4 +211,4 @@ export default function CardsAgainstHumanityPage() {
 
     {phase === "setup" && playMode === "local" && <p className="caption-footnote">All prompts and responses in this Game Library edition are original.</p>}
   </main>;
-}\n
+}

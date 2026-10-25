@@ -108,4 +108,4 @@ test("room errors preserve structured server messages and provide safe fallbacks
   assert.equal(readableErrorMessage(new Error("Room is full"), "Could not join room."), "Room is full");
   assert.equal(readableErrorMessage({ code: "PGRST" }, "Could not join room."), "Could not join room.");
   assert.match(readableErrorMessage(new TypeError("Failed to fetch"), "Could not join room."), /check your connection.*refresh the room/i);
-});\n
+});
