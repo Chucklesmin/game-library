@@ -121,7 +121,7 @@ export function createWorkerHandler({ env = () => undefined, fetcher = fetch, ra
       for (const job of claim.jobs ?? []) {
         const apiKey = env('NVIDIA_API_KEY');
         const budget = !apiKey || await rpc('cah_worker_reserve_budget', { p_attempts: 2 }) === true;
-        const decision = await decideFn(job.payload, { apiKey: budget ? apiKey : null, playerModel: env('NVIDIA_PLAYER_MODEL'), judgeModel: env('NVIDIA_JUDGE_MODEL'), fetcher: boundedFetch });
+        const decision = await decideFn(job.payload, { apiKey: budget ? apiKey : null, playerModel: env('NVIDIA_PLAYER_MODEL'), judgeModel: env('NVIDIA_JUDGE_MODEL'), fetcher: boundedFetch, timeoutMs: job.payload.kind === 'judge' ? 45000 : 25000 });
         if (!budget) decision.error = 'nvidia_budget_exhausted';
         await rpc('cah_worker_complete', { p_job_id: job.id, p_lease_token: job.leaseToken, p_result: decision.result, p_error: decision.result ? null : decision.error });
         completed++;

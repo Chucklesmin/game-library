@@ -66,3 +66,15 @@ test('worker requires one-use wake auth and releases lease after completing lega
   assert.equal(seen[2][1].p_result.fallback, true);
   assert.equal(seen[2][1].p_error, null);
 });
+test('worker gives judge inference a longer bounded window than player turns', async () => {
+  const seen = [];
+  const env = name => ({ SUPABASE_URL: 'https://db.invalid', SUPABASE_SERVICE_ROLE_KEY: 'server-only', NVIDIA_API_KEY: 'synthetic' })[name];
+  const fetcher = async url => {
+    const name = url.split('/').at(-1);
+    return Response.json(name === 'cah_worker_authorize' ? true : name === 'cah_worker_claim' ? { jobs: [{ id: 'job', leaseToken: 'lease', payload: { ...payload, kind: 'judge' } }] } : { status: 'ok' });
+  };
+  const handler = createWorkerHandler({ env, fetcher, decideFn: async (_job, options) => { seen.push(options.timeoutMs); return { result: null, error: 'nvidia_timeout' }; } });
+  const response = await handler(new Request('http://worker', { method: 'POST', body: JSON.stringify({ wakeToken: 'b'.repeat(64) }) }));
+  assert.equal(response.status, 200);
+  assert.deepEqual(seen, [45000]);
+});
