@@ -125,7 +125,28 @@ export type CardsAgainstHumanityView = {
   scores: { userId: string; name: string; score: number }[];
   submitted: boolean;
   voted: boolean;
+  settings?: { packSlug: string; responseMode: "write" | "cards"; scoringMode: "crowd" | "judge" };
+  participants?: { id: string; name: string; isBot: boolean; profile: string | null }[];
+  hand?: { id: string; text: string }[];
+  judge?: { status: string; explanation: string | null; winnerIds: string[] };
+  aiStatus?: { pending: number; fallbackUsed: boolean; failed: boolean };
 };
+
+export function cardsAgainstHumanityConfigure(roomId: string, packSlug: string, responseMode: string, scoringMode: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_configure", { p_room_id: roomId, p_pack_slug: packSlug, p_response_mode: responseMode, p_scoring_mode: scoringMode });
+}
+export function cardsAgainstHumanityAddBot(roomId: string, profile: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_add_bot", { p_room_id: roomId, p_profile: profile });
+}
+export function cardsAgainstHumanityRemoveBot(roomId: string, participantId: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_remove_bot", { p_room_id: roomId, p_participant_id: participantId });
+}
+export function cardsAgainstHumanitySubmitCard(roomId: string, cardId: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_submit_card", { p_room_id: roomId, p_card_id: cardId });
+}
+export function cardsAgainstHumanityJudgeFallback(roomId: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_judge_fallback", { p_room_id: roomId });
+}
 
 export function cardsAgainstHumanityView(roomId: string) {
   return invokeSignalRpc<CardsAgainstHumanityView>("cah_get_view", { p_room_id: roomId });

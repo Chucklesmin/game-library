@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { CAH_PROMPTS } from "@/lib/cards-against-humanity-prompts";
+import afterHours from "@/lib/cah-after-hours.json";
+import { dealHands, playHandCard } from "@/lib/cah-local-hands.mjs";
 import { canAddPlayer, canStartGame, createSubmission, drawPrompt, getVoteChoices, recordVote, scoreRound, validatePlayerName } from "@/lib/cards-against-humanity-rules.mjs";
 import { CardsAgainstHumanityOnline } from "@/components/cards-against-humanity-online";
 
@@ -35,6 +37,11 @@ export default function CardsAgainstHumanityPage() {
   const [notice, setNotice] = useState("");
   const [playMode, setPlayMode] = useState<"local" | "online">("local");
   const [displayName, setDisplayName] = useState("");
+  const [pack, setPack] = useState("original");
+  const [adultConfirmed, setAdultConfirmed] = useState(false);
+  const [responseMode, setResponseMode] = useState("write");
+  const [hands, setHands] = useState<ReturnType<typeof dealHands> | null>(null);
+  const prompts = pack === "after-hours" ? afterHours.prompts : CAH_PROMPTS;
 
   const isVoting = phase === "vote-ready" || phase === "vote";
   const currentPlayer = isVoting ? voteOrder[playerIndex] : players[playerIndex];
@@ -44,7 +51,7 @@ export default function CardsAgainstHumanityPage() {
     return result;
   }, {}), [submissions, votes]);
   const highScore = Math.max(0, ...Object.values(tallies));
-  const winners = submissions.filter((submission) => tallies[submission.id] === highScore);
+  const winners = submissions.filter((submission) => highScore > 0 && tallies[submission.id] === highScore);
 
   const addPlayer = () => {
     const { name, error } = validatePlayerName(players, playerName);
@@ -59,7 +66,7 @@ export default function CardsAgainstHumanityPage() {
   };
 
   const beginRound = (nextRound: number, used: string[]) => {
-    const nextPrompt = drawPrompt(CAH_PROMPTS, used);
+    const nextPrompt = drawPrompt(prompts, used);
     setPrompt(nextPrompt);
     setUsedPromptIds([...used, nextPrompt.id]);
     setRound(nextRound);
@@ -72,19 +79,23 @@ export default function CardsAgainstHumanityPage() {
   };
 
   const startGame = () => {
+    if (pack === "after-hours" && !adultConfirmed) { setNotice("Confirm that everyone is 21+ to use After Hours."); return; }
     if (!canStartGame(players)) {
       setNotice("Add at least three players to start.");
       return;
     }
     setPlayers((current) => current.map((player) => ({ ...player, score: 0 })));
     setUsedPromptIds([]);
+    setHands(responseMode === "cards" ? dealHands(players.map(player => player.id), afterHours.responses) : null);
     beginRound(1, []);
   };
 
-  const submitResponse = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const submitResponse = (event?: FormEvent<HTMLFormElement>, cardId?: string) => {
+    event?.preventDefault();
     if (!currentPlayer) return;
-    const nextSubmissions = createSubmission(submissions, currentPlayer.id, response, crypto.randomUUID());
+    const played = cardId && hands ? playHandCard(hands, currentPlayer.id, cardId) : null;
+    const nextSubmissions = createSubmission(submissions, currentPlayer.id, played?.card.text ?? response, crypto.randomUUID());
+    if (played) setHands(played.state);
     setResponse("");
     if (playerIndex + 1 < players.length) {
       setSubmissions(nextSubmissions);
@@ -134,7 +145,7 @@ export default function CardsAgainstHumanityPage() {
     {phase === "setup" && <section className="game-choice caption-choice">
       <p className="eyebrow">A QUICK-FIRE PARTY CARD GAME</p>
       <h1>Cards Against Humanity</h1>
-      <p>Finish a strange prompt, then vote for the response you wish you had written. This Game Library edition uses original prompts and player-written responses.</p>
+      <p>Finish a strange prompt with a card or your own words. Vote with friends, or open an online room to play solo with AI opponents.</p>
       <div className="cah-mode-switch" role="group" aria-label="Choose how to play"><button className={playMode === "local" ? "selected" : ""} onClick={() => setPlayMode("local")}>Pass and play</button><button className={playMode === "online" ? "selected" : ""} onClick={() => setPlayMode("online")}>Online room</button></div>
       {playMode === "online" && <label className="cah-name">Display name<input value={displayName} onChange={(event) => setDisplayName(event.target.value.slice(0,24))} placeholder="e.g. Jordan" maxLength={24} /></label>}
       {playMode === "online" ? <CardsAgainstHumanityOnline displayName={displayName} /> : <>
@@ -151,6 +162,10 @@ export default function CardsAgainstHumanityPage() {
         </section>
         <section className="caption-setup-card caption-rounds">
           <h2>Set the table</h2>
+          <label htmlFor="cah-local-pack">Card pack</label>
+          <select id="cah-local-pack" value={pack} onChange={event => { setPack(event.target.value); if (event.target.value === "original") setResponseMode("write"); }}><option value="original">Original</option><option value="after-hours">After Hours · 21+</option></select>
+          {pack === "after-hours" && <><label className="cah-consent"><input type="checkbox" checked={adultConfirmed} onChange={event => setAdultConfirmed(event.target.checked)} />Everyone playing is 21+ and wants adult dark humor.</label><label htmlFor="cah-local-response-mode">Responses</label><select id="cah-local-response-mode" value={responseMode} onChange={event => setResponseMode(event.target.value)}><option value="write">Write your own</option><option value="cards">Private hand of 7 cards</option></select></>}
+          <p className="caption-helper">For AI players and AI judging, choose Online room above. You can play alone with two bots.</p>
           <label htmlFor="caption-round-count">Rounds</label>
           <select id="caption-round-count" value={roundCount} onChange={(event) => setRoundCount(Number(event.target.value))}>
             {[3, 5, 7].map((count) => <option key={count} value={count}>{count} rounds</option>)}
@@ -174,12 +189,12 @@ export default function CardsAgainstHumanityPage() {
       </div> : <div className="caption-turn">
         <p className="eyebrow">YOUR CARD · {currentPlayer?.name}</p>
         <div className="caption-prompt">{prompt.text}</div>
-        <form className="caption-response-form" onSubmit={submitResponse}>
+        {responseMode === "cards" && hands && currentPlayer ? <div className="cah-hand" aria-label={`Private hand for ${currentPlayer.name}`}>{hands.hands[currentPlayer.id].map((card: {id:string;text:string}) => <button className="caption-answer" key={card.id} onClick={() => submitResponse(undefined, card.id)}>{card.text}</button>)}</div> : <form className="caption-response-form" onSubmit={submitResponse}>
           <label htmlFor="caption-response">Write a short response</label>
           <textarea id="caption-response" autoFocus value={response} onChange={(event) => setResponse(event.target.value.slice(0, 180))} placeholder="Make it count…" maxLength={180} required />
           <span className="caption-counter">{response.length}/180</span>
           <button className="caption-primary" type="submit">Lock in response</button>
-        </form>
+        </form>}
       </div>}
     </section>}
 
