@@ -38,4 +38,5 @@ button:focus-visible,a:focus-visible,select:focus-visible,textarea:focus-visible
 .cah-room-head button{background:#e7ddcc;color:#18233d}.cah-online-roster li{background:#182640;color:#edf3ff;border:1px solid #34486f}.cah-online-action>label{color:#edf3ff}.cah-online-action>p{color:#c2cee4}.cah-online-action select,.cah-online-action textarea{background:#10192d;color:#edf3ff;border-color:#7184af}
 .cah-room-head .cah-room-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
 .cah-room-head button:disabled{opacity:.6;cursor:wait}
+.cah-online-action>.round-badge{position:static;width:max-content}
 @media(max-width:520px){.cah-room-head{align-items:flex-start}.cah-room-head .cah-room-actions{flex-direction:column;align-items:stretch}.cah-room-head .cah-room-actions button{white-space:nowrap}}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MultiplayerLobby } from "@/components/multiplayer-lobby";
 import {
   cardsAgainstHumanityNext, cardsAgainstHumanityStart, cardsAgainstHumanitySubmit,
@@ -22,6 +22,7 @@ export function CardsAgainstHumanityOnline({ displayName }: { displayName: strin
   const [liveStatus, setLiveStatus] = useState("");
   const [subscriptionEpoch, setSubscriptionEpoch] = useState(0);
   const [busy, setBusy] = useState(false);
+  const lastVisibilitySync = useRef(0);
   const refresh = useCallback(async () => {
     if (!room) return;
     try { setView(await cardsAgainstHumanityView(room.id)); setMessage(""); }
@@ -57,7 +58,14 @@ export function CardsAgainstHumanityOnline({ displayName }: { displayName: strin
       if (status === "SUBSCRIBED") setLiveStatus("Live updates connected.");
       else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") setLiveStatus(error ? `Live updates interrupted: ${error.message}` : "Live updates interrupted. Refresh the room to sync.");
     };
-    const handleVisibilityChange = () => { if (document.visibilityState === "visible") void refreshRoom(); };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      const now = Date.now();
+      if (now - lastVisibilitySync.current < 3000) return;
+      lastVisibilitySync.current = now;
+      void refresh();
+      void listRoomPlayers(room.id).then(setPlayers).catch((error: unknown) => setMessage(readableErrorMessage(error, "Could not sync the room roster.")));
+    };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     void ensureGuest().then(() => {
       if (cancelled) return;

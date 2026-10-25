@@ -134,7 +134,7 @@ export default function CardsAgainstHumanityPage() {
     {phase === "setup" && <section className="game-choice caption-choice">
       <p className="eyebrow">A QUICK-FIRE PARTY CARD GAME</p>
       <h1>Cards Against Humanity</h1>
-      <p>Finish a strange prompt, then vote for the response you wish you had written. This Game Library edition uses its own original prompts and response cards.</p>
+      <p>Finish a strange prompt, then vote for the response you wish you had written. This Game Library edition uses original prompts and player-written responses.</p>
       <div className="cah-mode-switch" role="group" aria-label="Choose how to play"><button className={playMode === "local" ? "selected" : ""} onClick={() => setPlayMode("local")}>Pass and play</button><button className={playMode === "online" ? "selected" : ""} onClick={() => setPlayMode("online")}>Online room</button></div>
       {playMode === "online" && <label className="cah-name">Display name<input value={displayName} onChange={(event) => setDisplayName(event.target.value.slice(0,24))} placeholder="e.g. Jordan" maxLength={24} /></label>}
       {playMode === "online" ? <CardsAgainstHumanityOnline displayName={displayName} /> : <>
