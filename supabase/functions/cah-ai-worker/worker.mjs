@@ -69,7 +69,7 @@ export async function decide(payload, { apiKey, playerModel, judgeModel, fetcher
       const response = await fetcher('https://integrate.api.nvidia.com/v1/chat/completions', {
         method: 'POST', signal: controller.signal,
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: (payload.kind === 'judge' ? judgeModel : playerModel) || 'openai/gpt-oss-120b', messages: makeMessages(payload), temperature: payload.kind === 'judge' ? .2 : .75, max_tokens: payload.kind === 'judge' ? 2200 : 1200, stream: false, ...(!((payload.kind === 'judge' ? judgeModel : playerModel) || '').length || ((payload.kind === 'judge' ? judgeModel : playerModel) || '').includes('gpt-oss') ? { reasoning_effort: 'low' } : {}) }),
+        body: JSON.stringify({ model: (payload.kind === 'judge' ? judgeModel : playerModel) || 'openai/gpt-oss-20b', messages: makeMessages(payload), temperature: payload.kind === 'judge' ? .2 : .75, max_tokens: payload.kind === 'judge' ? 2200 : 1200, stream: false, ...(!((payload.kind === 'judge' ? judgeModel : playerModel) || '').length || ((payload.kind === 'judge' ? judgeModel : playerModel) || '').includes('gpt-oss') ? { reasoning_effort: 'low' } : {}) }),
       });
       if (!response.ok) {
         if ((response.status === 429 || response.status >= 500) && attempt === 0) { await sleep(500); continue; }

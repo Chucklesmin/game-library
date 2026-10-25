@@ -91,3 +91,10 @@ Sources: https://docs.api.nvidia.com/nim/reference/openai-gpt-oss-120b-infer ; h
 - Remaining acceptance gate: owner verifies hosted inference access for the NVIDIA organization/API key; then rerun the production bot and judge round, capture successful output, latency, token usage and scoring. Keep CQ-027 open until that passes.
 
 Sources: https://docs.api.nvidia.com/nim/reference/llm-apis ; https://forums.developer.nvidia.com/t/request-to-enable-public-api-endpoints-for-personal-organization-http-410/385263
+
+## Verified provider correction and Supabase deck source — 2026-10-25
+
+- The user confirmed the NVIDIA API key was already active. A direct request body identified the actual HTTP 410 cause: `openai/gpt-oss-120b` reached end of life on 2026-09-03. This supersedes the account-provisioning hypothesis above; the account is not the diagnosed cause.
+- Switched the worker default player and judge model to `openai/gpt-oss-20b`, which is present in NVIDIA's current public model list. The function was redeployed as version 3; live game inference remains to be retested.
+- The canonical runtime deck is `public.game_content`; it contains 36 Original prompts, 250 After Hours prompts, and 500 After Hours responses. Applied migration `20261025153031_cah_public_deck_read_access` with anonymous SELECT constrained by RLS to published CAH content. Local pass-and-play now loads the same published rows through Supabase; JSON and seed migration remain source-control artifacts for repeatable seeding/tests.
+- Evidence: migration listing and production aggregate query; `npm test` 27/27, `npm run typecheck`, and `npm run build` pass. Lint command was interrupted because it did not produce output; do not claim lint passed in this checkpoint.

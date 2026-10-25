@@ -29,6 +29,7 @@ test('bounded transient retries and permanent failures', async () => {
     calls++;
     const body = JSON.parse(options.body);
     assert.equal(body.stream, false);
+    assert.equal(body.model, 'openai/gpt-oss-20b');
     return calls === 1 ? new Response('', { status: 429 }) : Response.json({ choices: [{ finish_reason: 'stop', message: { content: '{"choiceId":"card-a"}' } }], usage: { prompt_tokens: 11, completion_tokens: 9 } });
   };
   const result = await decide(payload, { apiKey: 'synthetic', fetcher, sleep: async () => {} });

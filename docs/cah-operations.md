@@ -2,7 +2,7 @@
 
 ## AI worker configuration
 
-The browser never receives the NVIDIA credential. Set `NVIDIA_API_KEY` as a Supabase Edge Function secret for `cah-ai-worker`. Optional server secrets `NVIDIA_PLAYER_MODEL` and `NVIDIA_JUDGE_MODEL` select OpenAI-compatible NVIDIA model IDs; defaults are `openai/gpt-oss-120b`. Redeploy the function after changing its code, not after changing a Supabase secret.
+The browser never receives the NVIDIA credential. Set `NVIDIA_API_KEY` as a Supabase Edge Function secret for `cah-ai-worker`. Optional server secrets `NVIDIA_PLAYER_MODEL` and `NVIDIA_JUDGE_MODEL` select OpenAI-compatible NVIDIA model IDs; defaults are `openai/gpt-oss-20b`. Redeploy the function after changing its code, not after changing a Supabase secret.
 
 The worker is awakened by database `pg_net` calls. Its URL is held in `private.cah_worker_settings`; a null URL disables wakes. The recovery cron runs once a minute. Never put the API key in SQL, browser variables, logs, or this file.
 

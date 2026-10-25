@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
-import { CAH_PROMPTS } from "@/lib/cards-against-humanity-prompts";
-import afterHours from "@/lib/cah-after-hours.json";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { loadCahDeck } from "@/lib/cah-deck.mjs";
 import { dealHands, playHandCard } from "@/lib/cah-local-hands.mjs";
 import { canAddPlayer, canStartGame, createSubmission, drawPrompt, getVoteChoices, recordVote, scoreRound, validatePlayerName } from "@/lib/cards-against-humanity-rules.mjs";
 import { CardsAgainstHumanityOnline } from "@/components/cards-against-humanity-online";
+import { supabase } from "@/lib/supabase";
 
 type Player = { id: string; name: string; score: number };
 type Submission = { id: string; authorId: string; text: string };
+type CahDeck = { originalPrompts: {id:string;text:string}[]; afterHoursPrompts: {id:string;text:string}[]; responses: {id:string;text:string}[] };
 type Phase = "setup" | "submit-ready" | "submit" | "vote-ready" | "vote" | "reveal" | "complete";
 
 function shuffle<T>(items: T[]): T[] {
@@ -28,7 +29,7 @@ export default function CardsAgainstHumanityPage() {
   const [roundCount, setRoundCount] = useState(5);
   const [round, setRound] = useState(0);
   const [usedPromptIds, setUsedPromptIds] = useState<string[]>([]);
-  const [prompt, setPrompt] = useState(CAH_PROMPTS[0]);
+  const [prompt, setPrompt] = useState<{id:string;text:string}>({ id: "", text: "" });
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [voteOrder, setVoteOrder] = useState<Player[]>([]);
   const [playerIndex, setPlayerIndex] = useState(0);
@@ -41,7 +42,22 @@ export default function CardsAgainstHumanityPage() {
   const [adultConfirmed, setAdultConfirmed] = useState(false);
   const [responseMode, setResponseMode] = useState("write");
   const [hands, setHands] = useState<ReturnType<typeof dealHands> | null>(null);
-  const prompts = pack === "after-hours" ? afterHours.prompts : CAH_PROMPTS;
+  const [localDeck, setLocalDeck] = useState<CahDeck | null>(null);
+  const [deckLoading, setDeckLoading] = useState(true);
+  const [deckError, setDeckError] = useState("");
+  const prompts = pack === "after-hours" ? localDeck?.afterHoursPrompts ?? [] : localDeck?.originalPrompts ?? [];
+
+  useEffect(() => {
+    let active = true;
+    void loadCahDeck(supabase).then((deck: CahDeck) => {
+      if (active) setLocalDeck(deck);
+    }).catch((error: unknown) => {
+      if (active) setDeckError(error instanceof Error ? error.message : "Could not load the card deck from Supabase.");
+    }).finally(() => {
+      if (active) setDeckLoading(false);
+    });
+    return () => { active = false; };
+  }, []);
 
   const isVoting = phase === "vote-ready" || phase === "vote";
   const currentPlayer = isVoting ? voteOrder[playerIndex] : players[playerIndex];
@@ -80,13 +96,14 @@ export default function CardsAgainstHumanityPage() {
 
   const startGame = () => {
     if (pack === "after-hours" && !adultConfirmed) { setNotice("Confirm that everyone is 21+ to use After Hours."); return; }
+    if (!localDeck || prompts.length === 0) { setNotice(deckError || "The card deck is still loading."); return; }
     if (!canStartGame(players)) {
       setNotice("Add at least three players to start.");
       return;
     }
     setPlayers((current) => current.map((player) => ({ ...player, score: 0 })));
     setUsedPromptIds([]);
-    setHands(responseMode === "cards" ? dealHands(players.map(player => player.id), afterHours.responses) : null);
+    setHands(responseMode === "cards" ? dealHands(players.map(player => player.id), localDeck.responses) : null);
     beginRound(1, []);
   };
 
@@ -171,7 +188,9 @@ export default function CardsAgainstHumanityPage() {
             {[3, 5, 7].map((count) => <option key={count} value={count}>{count} rounds</option>)}
           </select>
           <p className="caption-helper">One point for every response tied for the crowd favorite.</p>
-          <button className="caption-primary" onClick={startGame}>Start game</button>
+          {deckLoading && <p className="caption-helper" role="status">Loading card deck…</p>}
+          {deckError && <p className="caption-notice" role="alert">{deckError}</p>}
+          <button className="caption-primary" onClick={startGame} disabled={deckLoading || !localDeck}>Start game</button>
         </section>
       </div>
       {notice && <p className="caption-notice" role="status">{notice}</p>}
