@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { isInvalidGuestSessionError } from "@/lib/guest-session.mjs";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameDefinition, RoomSnapshot } from "@/lib/game-library";
 
@@ -6,8 +7,18 @@ const client = () => { if (!supabase) throw new Error("Multiplayer is not config
 
 export async function ensureGuest() {
   const db = client();
-  const { data: { session } } = await db.auth.getSession();
-  if (session) return session.user;
+  const { data: { session }, error: sessionError } = await db.auth.getSession();
+  if (sessionError) throw sessionError;
+  if (session) {
+    const { data: { user }, error } = await db.auth.getUser();
+    if (user) return user;
+    if (!isInvalidGuestSessionError(error)) {
+      if (error) throw error;
+      throw new Error("Guest session could not be verified.");
+    }
+    const { error: signOutError } = await db.auth.signOut({ scope: "local" });
+    if (signOutError) throw signOutError;
+  }
   const { data, error } = await db.auth.signInAnonymously();
   if (error) throw new Error("Guest sign-in is unavailable. Enable Anonymous Sign-Ins in Supabase Auth.");
   if (!data.user) throw new Error("Guest sign-in did not return a user.");
@@ -105,15 +116,46 @@ export function wavelengthTimeoutPhase(roomId: string) {
   return invokeSignalRpc("wavelength_timeout_phase", { p_room_id: roomId });
 }
 
-export function subscribeToRoom(roomId: string, onUpdate: (room: RoomSnapshot) => void) {
+export type CardsAgainstHumanityView = {
+  phase: "lobby" | "submitting" | "voting" | "reveal" | "complete";
+  round: number;
+  totalRounds: number;
+  prompt: string | null;
+  responses: { id: string; text: string; author: string | null; votes: number | null }[];
+  scores: { userId: string; name: string; score: number }[];
+  submitted: boolean;
+  voted: boolean;
+};
+
+export function cardsAgainstHumanityView(roomId: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_get_view", { p_room_id: roomId });
+}
+
+export function cardsAgainstHumanityStart(roomId: string, rounds: number) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_start_game", { p_room_id: roomId, p_total_rounds: rounds });
+}
+
+export function cardsAgainstHumanitySubmit(roomId: string, answer: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_submit_answer", { p_room_id: roomId, p_answer: answer });
+}
+
+export function cardsAgainstHumanityVote(roomId: string, submissionId: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_cast_vote", { p_room_id: roomId, p_submission_id: submissionId });
+}
+
+export function cardsAgainstHumanityNext(roomId: string) {
+  return invokeSignalRpc<CardsAgainstHumanityView>("cah_next_round", { p_room_id: roomId });
+}
+
+export function subscribeToRoom(roomId: string, onUpdate: (room: RoomSnapshot) => void, onStatus?: (status: string, error?: Error) => void) {
   const db = client();
-  const channel = db.channel(`room:${roomId}`).on("postgres_changes", { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${roomId}` }, (event) => onUpdate(event.new as RoomSnapshot)).subscribe();
+  const channel = db.channel(`room:${roomId}`).on("postgres_changes", { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${roomId}` }, (event) => onUpdate(event.new as RoomSnapshot)).subscribe((status, error) => onStatus?.(status, error));
   return () => { void db.removeChannel(channel); };
 }
 
-export function subscribeToRoomPlayers(roomId: string, onUpdate: (players: RoomPlayer[]) => void) {
+export function subscribeToRoomPlayers(roomId: string, onUpdate: (players: RoomPlayer[]) => void, onStatus?: (status: string, error?: Error) => void) {
   const db = client();
-  const channel = db.channel(`room-players:${roomId}`).on("postgres_changes", { event: "*", schema: "public", table: "room_players", filter: `room_id=eq.${roomId}` }, () => { void listRoomPlayers(roomId).then(onUpdate); }).subscribe();
+  const channel = db.channel(`room-players:${roomId}`).on("postgres_changes", { event: "*", schema: "public", table: "room_players", filter: `room_id=eq.${roomId}` }, () => { void listRoomPlayers(roomId).then(onUpdate); }).subscribe((status, error) => onStatus?.(status, error));
   return () => { void db.removeChannel(channel); };
 }
 

@@ -16,8 +16,17 @@ The local mode needs no account or network connection. The online mode uses a pr
 
 ```bash
 npm install
+npx supabase start
 npm run dev
 ```
+
+Cards Against Humanity's local multiplayer acceptance uses three independent anonymous guests and checks privacy, reconnect behavior, blind voting, scoring, unique prompts, and Realtime updates:
+
+```bash
+npm run test:cah:local
+```
+
+To replay migration acceptance from a fresh database, run `npx supabase db reset --local` first. This resets data in the local Supabase database, so use it only with disposable development data. Leave the local app and Supabase stack running when you want to keep trying the game.
 
 ## Supabase + Vercel
 
