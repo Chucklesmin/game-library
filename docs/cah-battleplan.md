@@ -82,3 +82,12 @@ Keep this checklist current after verified milestones. Capture concise state/evi
 - Remaining acceptance gate: configure `NVIDIA_API_KEY` in Supabase Edge Function secrets, then run actual NVIDIA player and judge calls and record latency/usage. Do not mark the AI provider gate complete before that live test.
 
 Sources: https://docs.api.nvidia.com/nim/reference/openai-gpt-oss-120b-infer ; https://supabase.com/docs/guides/functions/secrets . Reverify implementation-sensitive APIs and model features before release.
+
+## Provider recheck — 2026-10-25
+
+- Supersedes the prior missing-secret gate: a fresh database-minted worker wake reported `configured:true`, confirming `NVIDIA_API_KEY` is now present in the Edge Function environment.
+- A production After Hours round with two AI players exercised player inference and the judge. Supabase `net._http_response` recorded `nvidia_http_410` on worker calls. The UI disclosed bot fallback and judge unavailability; switching to crowd voting completed and scored the round correctly.
+- The current NVIDIA NIM API reference still lists `https://integrate.api.nvidia.com/v1/chat/completions` and `openai/gpt-oss-120b`. NVIDIA forum reports associate HTTP 410 with hosted-inference access/provisioning, including cases where a key exists. That is a plausible explanation, not a confirmed diagnosis for this account.
+- Remaining acceptance gate: owner verifies hosted inference access for the NVIDIA organization/API key; then rerun the production bot and judge round, capture successful output, latency, token usage and scoring. Keep CQ-027 open until that passes.
+
+Sources: https://docs.api.nvidia.com/nim/reference/llm-apis ; https://forums.developer.nvidia.com/t/request-to-enable-public-api-endpoints-for-personal-organization-http-410/385263
