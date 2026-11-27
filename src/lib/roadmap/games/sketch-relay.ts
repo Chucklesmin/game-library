@@ -56,7 +56,7 @@ const clues: readonly Clue[] = [
 ];
 
 type Phase = "setup" | "ready" | "drawing" | "reveal" | "complete";
-type Result = { kind: "solved"; guesser: string } | { kind: "expired" | "skipped" };
+type Result = { kind: "solved"; guesser: string; guess?: string } | { kind: "expired" | "skipped" };
 type State = {
   phase: Phase;
   roster: string[];
@@ -220,7 +220,7 @@ export const game: GameDefinition<State> = {
       }
       const words = " " + answer + " ";
       const matches = currentClue(state).parts.every((part) => part.some((word) => words.includes(" " + word + " ")));
-      if (matches) return reveal(state, { kind: "solved", guesser: actorId });
+      if (matches) return reveal(state, { kind: "solved", guesser: actorId, guess });
       return { ...state, lastGuesses: { ...state.lastGuesses, [actorId]: now } };
     }
     throw new Error("That move is not available now.");
@@ -286,15 +286,23 @@ export const game: GameDefinition<State> = {
 
     const finished = state.phase === "complete";
     const leaders = standings.filter((entry) => entry.score === standings[0].score).map((entry) => entry.label);
-    const detail = state.result?.kind === "solved"
-      ? `${playerName(context, state.result.guesser)} guessed first and earned 2 points. ${artist} earned 1 point.`
-      : state.result?.kind === "skipped" ? "The host skipped this turn. No points were awarded."
+    const result = state.result;
+    const guesser = result?.kind === "solved" ? playerName(context, result.guesser) : null;
+    const firstGuess = result?.kind === "solved" ? result.guess : undefined;
+    const guessRecap = guesser === null ? "No correct guess this turn" : `First correct guess by ${guesser}`;
+    const detail = guesser !== null
+      ? `${guesser} guessed first and earned 2 points. ${artist} earned 1 point.`
+      : result?.kind === "skipped" ? "The host skipped this turn. No points were awarded."
         : "Time ran out before a correct guess. No points were awarded.";
     return {
       phase: state.phase, round, standings, detail, finished,
-      heading: finished ? "Sketch Relay complete" : state.result?.kind === "solved" ? "Scene solved!" : "Scene revealed",
+      heading: finished ? "Sketch Relay complete" : result?.kind === "solved" ? "Scene solved!" : "Scene revealed",
       cards: [
-        { title: "The scene", body: currentClue(state).scene },
+        {
+          title: "The scene",
+          body: currentClue(state).scene,
+          items: [firstGuess === undefined ? guessRecap : `${guessRecap} — “${firstGuess}”`],
+        },
         ...(finished ? [{
           title: leaders.length === 1 ? "Winner" : "Shared first place",
           body: `${leaders.join(", ")} · ${standings[0].score} points`,

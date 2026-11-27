@@ -205,6 +205,10 @@ export function RoadmapRoom({ game, configured, inviteCode }: { game: GameInfo; 
   }
 
   const view = room?.game;
+  const sketchRecap = game.slug === "sketch-relay" && (view?.phase === "reveal" || view?.phase === "complete");
+  const publicCards = view?.cards?.length ? <Cards cards={view.cards} /> : null;
+  const drawing = view?.drawing && room ? <RoadmapDrawing key={"drawing:" + room.turn} drawing={view.drawing}
+    send={(id, data) => move(id, { stroke: data })} pending={pending} /> : null;
   const playerRange = game.minimumPlayers === game.maximumPlayers ? game.minimumPlayers
     : `${game.minimumPlayers}–${game.maximumPlayers}`;
   return <main className={styles.shell} data-game-design={game.slug} data-game-phase={view?.phase ?? (room ? "lobby" : "entry")}>
@@ -252,9 +256,10 @@ export function RoadmapRoom({ game, configured, inviteCode }: { game: GameInfo; 
         </div>
         {view.detail && <p data-game-zone="detail">{view.detail}</p>}
         {!!view.privateCards?.length && <Cards cards={view.privateCards} heading={view.privateHeading ?? "Only you can see this"} />}
-        {!!view.cards?.length && <Cards cards={view.cards} />}
-        {view.drawing && <RoadmapDrawing key={"drawing:" + room.turn} drawing={view.drawing}
-          send={(id, data) => move(id, { stroke: data })} pending={pending} />}
+        {sketchRecap ? <section className={styles.sketchRecap} aria-label="Turn recap">
+          {drawing}
+          {publicCards}
+        </section> : <>{publicCards}{drawing}</>}
         {view.controls.length > 0 && <div className={styles.actions} data-game-zone="actions" key={"controls:" + room.turn}>
           {view.controls.map((control) => <MoveControl key={control.id} control={control} pending={pending} move={move} />)}
         </div>}

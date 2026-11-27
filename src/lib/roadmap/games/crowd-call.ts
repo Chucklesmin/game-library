@@ -1,6 +1,8 @@
 import type { DisplayCard, GameContext, GameControl, GameDefinition, GameView } from "../contract.ts";
 
 const ROUND_COUNT = 5;
+const percent = new Intl.NumberFormat("en", { style: "percent", maximumFractionDigits: 1 });
+const points = new Intl.NumberFormat("en", { maximumFractionDigits: 1 });
 
 const prompts = [
   { question: "What would this room save from a closing neighborhood arcade?", choices: ["The pinball machine", "The racing cabinet", "The claw machine", "The high-score board"] },
@@ -96,6 +98,41 @@ function standingsFor(state: State, context: GameContext) {
     .sort((first, second) => second.score - first.score);
 }
 
+function comparisonCard(state: State, result: Result): DisplayCard {
+  const prompt = promptFor(state);
+  const predictions = Object.values(state.predictions);
+  const voteTotal = result.counts.reduce((sum, count) => sum + count, 0);
+  const predictionCounts = prompt.choices.map((_, index) =>
+    predictions.filter((choice) => choice === index).length,
+  );
+  // A common denominator keeps equally underestimated choices tied before rounding.
+  const gaps = result.counts.map((count, index) =>
+    count * predictions.length - predictionCounts[index] * voteTotal,
+  );
+  const biggestGap = Math.max(...gaps);
+  const summary = [
+    `${predictions.length} ${predictions.length === 1 ? "prediction" : "predictions"} · ${voteTotal} ${voteTotal === 1 ? "vote" : "votes"}`,
+  ];
+  if (biggestGap > 0) {
+    const underestimated = prompt.choices.filter((_, index) => gaps[index] === biggestGap);
+    const difference = points.format(biggestGap * 100 / (predictions.length * voteTotal));
+    summary.push(`Most underestimated: ${underestimated.join(" / ")} (+${difference} percentage points)`);
+  }
+
+  return {
+    title: prompt.question,
+    body: summary.join(". ") + ".",
+    items: prompt.choices.map((choice, index) => {
+      const forecast = predictionCounts[index];
+      const votes = result.counts[index];
+      const forecastShare = predictions.length ? ` (${percent.format(forecast / predictions.length)})` : "";
+      const voteShare = voteTotal ? ` (${percent.format(votes / voteTotal)})` : "";
+      const leadLabel = result.leaders.includes(index) ? " · Leading answer" : "";
+      return `${choice} — ${forecast} ${forecast === 1 ? "prediction" : "predictions"}${forecastShare} · ${votes} ${votes === 1 ? "vote" : "votes"}${voteShare}${leadLabel}`;
+    }),
+  };
+}
+
 function viewFor(state: State, context: GameContext): GameView {
   checkParticipant(context);
   const prompt = promptFor(state);
@@ -161,14 +198,7 @@ function viewFor(state: State, context: GameContext): GameView {
     heading: "The room's call",
     detail,
     round,
-    cards: [{
-      title: prompt.question,
-      items: prompt.choices.map((choice, index) => {
-        const count = result.counts[index];
-        const leadLabel = result.leaders.includes(index) ? " · Leading answer" : "";
-        return `${choice} — ${count} ${count === 1 ? "vote" : "votes"}${leadLabel}`;
-      }),
-    }],
+    cards: [comparisonCard(state, result)],
     privateCards,
     standings,
     controls: host ? [{ id: moveId(state, "next"), label: state.round < ROUND_COUNT ? "Next prompt" : "See final standings" }] : [],

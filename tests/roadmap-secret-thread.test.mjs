@@ -113,3 +113,73 @@ test("Secret Thread plays a five-puzzle cooperative session and reports the goal
   assert.equal(state.solves, 5);
   assert.throws(() => move(state, host, "next"), /no longer/);
 });
+
+
+test("Secret Thread explains only the clues actually dealt after each reveal outcome", () => {
+  const host = context();
+  const guest = context(1);
+  let state = game.create(host);
+
+  for (const result of ["solved", "strikes", "expired"]) {
+    const dealt = [0, 1, 2].map((seat) => game.view(state, context(seat)).privateCards[0].items);
+    const prefix = (seat) => `${players[seat].name}’s clues`;
+    const puzzle = state.puzzles[state.round];
+    const clueCards = (view) => view.cards.filter(({ title }) => title.endsWith("’s clues"));
+
+    assert.deepEqual(clueCards(game.view(state, guest)), []);
+    if (result === "solved") {
+      state = move(state, guest, "guess", { answer: puzzle.answer });
+    } else if (result === "strikes") {
+      for (const guess of ["Banana", "Clock", "Desk"]) state = move(state, guest, "guess", { answer: guess });
+    } else {
+      const atDeadline = context(1, state.deadline);
+      assert.deepEqual(clueCards(game.view(state, atDeadline)), []);
+      state = move(state, atDeadline, "reveal");
+    }
+
+    const reloaded = JSON.parse(JSON.stringify(state));
+    const reveal = game.view(reloaded, guest);
+    assert.deepEqual(reveal.cards, game.view(reloaded, host).cards);
+    assert.equal(reveal.privateCards, undefined);
+    const shown = clueCards(reveal);
+    assert.deepEqual(shown.map(({ title }) => title), dealt.map((_, seat) => prefix(seat)));
+    for (const [seat, clues] of dealt.entries()) {
+      const { items } = shown[seat];
+      assert.equal(items.length, clues.length);
+      for (const [index, fragment] of clues.entries()) {
+        const clueAndConnection = items[index];
+        assert.ok(clueAndConnection.startsWith(`${fragment} — `));
+        assert.ok(clueAndConnection.slice(fragment.length + 3).trim());
+      }
+    }
+    for (const fragment of puzzle.pairs.flat()) {
+      if (!dealt.flat().includes(fragment)) assert.ok(!JSON.stringify(reveal).includes(fragment));
+    }
+
+    state = move(state, host, "next");
+    assert.deepEqual(clueCards(game.view(state, guest)), []);
+  }
+});
+
+test("Secret Thread can explain serialized clues from an existing room", () => {
+  const host = context();
+  const state = game.create(host);
+  state.puzzles[0] = {
+    answer: "Bridge",
+    explanation: "A bridge can span water, link song sections, support the strings on a violin, or replace missing teeth.",
+    pairs: [
+      ["A detour ends when a river crossing reopens.", "A song changes direction before returning to its chorus."],
+      ["On a violin, four strings rest on a little wooden arch.", "A dentist joins an artificial tooth to its neighbors."],
+      ["The captain steers from an elevated room.", "A card partnership bids for a contract."],
+    ],
+  };
+  const reloaded = JSON.parse(JSON.stringify(state));
+  const reveal = game.view(move(reloaded, host, "guess", { answer: "Bridge" }), host);
+  assert.deepEqual(reveal.cards[2], {
+    title: "Player 2’s clues",
+    items: [
+      "On a violin, four strings rest on a little wooden arch. — A violin bridge holds the strings above the instrument’s body.",
+      "A dentist joins an artificial tooth to its neighbors. — A dental bridge holds a replacement tooth between neighboring teeth.",
+    ],
+  });
+});

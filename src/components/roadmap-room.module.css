@@ -64,6 +64,12 @@
 .drawingInteractive { touch-action: none; cursor: crosshair; }
 .drawingTools { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; margin-bottom: .55rem; }
 .drawingTools label { min-width: 6rem; }
+.sketchRecap { display: grid; gap: .75rem; align-items: start; }
+.sketchRecap:has(canvas) { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+.sketchRecap .cards { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 600px) {
+  .sketchRecap:has(canvas) { grid-template-columns: minmax(0, 1fr); }
+}
 
 
 .catalog { display: grid; gap: 1rem; margin-top: 2rem; }

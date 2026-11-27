@@ -7,117 +7,314 @@ type Puzzle = {
   pairs: readonly (readonly [string, string])[];
 };
 
-const PUZZLES: readonly Puzzle[] = [
+type AuthoredClue = readonly [fragment: string, connection: string];
+type AuthoredPuzzle = Omit<Puzzle, "pairs"> & {
+  pairs: readonly (readonly [AuthoredClue, AuthoredClue])[];
+};
+
+const PUZZLES: readonly AuthoredPuzzle[] = [
   {
     answer: "Bridge",
     explanation: "A bridge can span water, link song sections, support the strings on a violin, or replace missing teeth.",
     pairs: [
-      ["A detour ends when a river crossing reopens.", "A song changes direction before returning to its chorus."],
-      ["On a violin, four strings rest on a little wooden arch.", "A dentist joins an artificial tooth to its neighbors."],
-      ["The captain steers from an elevated room.", "A card partnership bids for a contract."],
-      ["A gymnast arches up from the floor.", "A narrow passage can join two buildings above the street."],
-      ["The span must leave room for boats to pass underneath.", "A paragraph can link two otherwise separate ideas."],
-      ["Spectacles rest across this part of your nose.", "A small piece of hardware joins network segments."],
-      ["An extra loan covers the gap before long-term funding arrives.", "Two city neighborhoods meet above railroad tracks."],
-      ["A plank crossing turns hikers into single-file travelers.", "A songwriter sometimes calls the contrasting section the middle eight."],
+      [
+        ["A detour ends when a river crossing reopens.", "A road bridge lets traffic cross the river."],
+        ["A song changes direction before returning to its chorus.", "A musical bridge changes the mood or melody between familiar sections."],
+      ],
+      [
+        ["On a violin, four strings rest on a little wooden arch.", "A violin bridge holds the strings above the instrument’s body."],
+        ["A dentist joins an artificial tooth to its neighbors.", "A dental bridge holds a replacement tooth between neighboring teeth."],
+      ],
+      [
+        ["The captain steers from an elevated room.", "The bridge is a ship’s command and navigation room."],
+        ["A card partnership bids for a contract.", "Contract bridge is a card game where partners bid together."],
+      ],
+      [
+        ["A gymnast arches up from the floor.", "A gymnastics bridge is a backbend supported by hands and feet."],
+        ["A narrow passage can join two buildings above the street.", "A skybridge connects buildings above street level."],
+      ],
+      [
+        ["The span must leave room for boats to pass underneath.", "A bridge leaves clearance for boats beneath its span."],
+        ["A paragraph can link two otherwise separate ideas.", "A transition can bridge the gap between ideas."],
+      ],
+      [
+        ["Spectacles rest across this part of your nose.", "The nose bridge supports eyeglasses between the lenses."],
+        ["A small piece of hardware joins network segments.", "A network bridge connects segments so traffic can pass between them."],
+      ],
+      [
+        ["An extra loan covers the gap before long-term funding arrives.", "A bridge loan covers expenses until longer-term funding arrives."],
+        ["Two city neighborhoods meet above railroad tracks.", "An overpass is a bridge that spans the railroad tracks."],
+      ],
+      [
+        ["A plank crossing turns hikers into single-file travelers.", "A footbridge carries hikers over an obstacle."],
+        ["A songwriter sometimes calls the contrasting section the middle eight.", "The middle eight often serves as a musical bridge."],
+      ],
     ],
   },
   {
     answer: "Shell",
     explanation: "A shell can house a snail, protect an egg, or provide the interface where someone types computer commands.",
     pairs: [
-      ["A snail carries its own shelter.", "Breakfast starts with a crack."],
-      ["A terminal waits for your next typed command.", "A crab has to molt to grow."],
-      ["A hermit crab moves into someone else's old home.", "A baked pastry case is ready for its filling."],
-      ["A nutcracker opens a hard outer cover.", "Macaroni can be shaped like a small curved cup."],
-      ["A fossil can preserve the outline of an ancient mollusk.", "An empty building still has an exterior."],
-      ["A scallop valve may wash up on a beach.", "In chemistry, electrons are grouped around a nucleus in layers."],
-      ["A taco's crisp folded casing holds the filling.", "A protective jacket can block wind without providing insulation."],
-      ["A chocolate coating breaks when you tap the dessert.", "A company can legally exist with almost no operations."],
+      [
+        ["A snail carries its own shelter.", "A snail’s shell protects its soft body."],
+        ["Breakfast starts with a crack.", "Cracking the eggshell exposes the egg inside."],
+      ],
+      [
+        ["A terminal waits for your next typed command.", "The shell interprets commands entered in a terminal."],
+        ["A crab has to molt to grow.", "A crab sheds its hard outer shell as it grows."],
+      ],
+      [
+        ["A hermit crab moves into someone else's old home.", "A hermit crab finds a discarded shell to live in."],
+        ["A baked pastry case is ready for its filling.", "A pastry shell is a baked case for a filling."],
+      ],
+      [
+        ["A nutcracker opens a hard outer cover.", "A nutshell protects the edible kernel."],
+        ["Macaroni can be shaped like a small curved cup.", "Shell pasta is named for its curved, hollow shape."],
+      ],
+      [
+        ["A fossil can preserve the outline of an ancient mollusk.", "The shape of a fossilized shell can identify a mollusk."],
+        ["An empty building still has an exterior.", "The shell of a building is its outer structure."],
+      ],
+      [
+        ["A scallop valve may wash up on a beach.", "A scallop’s two shell halves are called valves."],
+        ["In chemistry, electrons are grouped around a nucleus in layers.", "An electron shell groups electrons by energy level."],
+      ],
+      [
+        ["A taco's crisp folded casing holds the filling.", "A crisp taco shell holds the filling."],
+        ["A protective jacket can block wind without providing insulation.", "A shell jacket is a protective outer layer."],
+      ],
+      [
+        ["A chocolate coating breaks when you tap the dessert.", "A hardened chocolate shell covers the dessert."],
+        ["A company can legally exist with almost no operations.", "A shell company has little or no active business."],
+      ],
     ],
   },
   {
     answer: "Spring",
     explanation: "Spring is a season, a source of groundwater, and a component that can return to shape after compression.",
     pairs: [
-      ["Cherry blossoms arrive before summer heat.", "A pen clicks when a coiled part compresses."],
-      ["Water emerges naturally from underground.", "An unused trap snaps back after the latch releases."],
-      ["Snow melts and the first crocuses appear.", "A mattress gives when you sit and bounces back when you stand."],
-      ["Mineral-rich water bubbles up at a spa.", "A dancer leaps suddenly from a crouch."],
-      ["A clothespin holds laundry because a coil presses its arms together.", "A bear finally leaves its winter den."],
-      ["A clockmaker winds a flat strip to store mechanical energy.", "A hiker refills their bottle where water seeps from rock."],
-      ["An equinox starts this season in one hemisphere.", "A loose sofa cushion lets you feel a coil beneath it."],
-      ["A little push sends a jack-in-the-box into the air.", "A farmer watches for the last frost before planting."],
+      [
+        ["Cherry blossoms arrive before summer heat.", "Cherry trees usually bloom in spring."],
+        ["A pen clicks when a coiled part compresses.", "A spring inside a retractable pen compresses and releases."],
+      ],
+      [
+        ["Water emerges naturally from underground.", "A spring is a place where groundwater reaches the surface."],
+        ["An unused trap snaps back after the latch releases.", "A spring can snap a trap shut when its latch releases."],
+      ],
+      [
+        ["Snow melts and the first crocuses appear.", "Melting snow and early crocuses signal spring."],
+        ["A mattress gives when you sit and bounces back when you stand.", "Mattress springs compress under weight and rebound when it lifts."],
+      ],
+      [
+        ["Mineral-rich water bubbles up at a spa.", "A mineral spring brings dissolved minerals to the surface."],
+        ["A dancer leaps suddenly from a crouch.", "The dancer springs up by pushing off suddenly."],
+      ],
+      [
+        ["A clothespin holds laundry because a coil presses its arms together.", "A clothespin spring squeezes its two arms together."],
+        ["A bear finally leaves its winter den.", "Many bears emerge from their dens in spring."],
+      ],
+      [
+        ["A clockmaker winds a flat strip to store mechanical energy.", "A wound mainspring stores energy to run a mechanical clock."],
+        ["A hiker refills their bottle where water seeps from rock.", "Seepage from rock can mark a natural spring."],
+      ],
+      [
+        ["An equinox starts this season in one hemisphere.", "The vernal equinox marks the beginning of astronomical spring."],
+        ["A loose sofa cushion lets you feel a coil beneath it.", "The coil under the cushion is a spring."],
+      ],
+      [
+        ["A little push sends a jack-in-the-box into the air.", "A spring pushes the jack-in-the-box figure upward."],
+        ["A farmer watches for the last frost before planting.", "The last spring frost helps determine when outdoor planting can start."],
+      ],
     ],
   },
   {
     answer: "Current",
     explanation: "Current can be moving water, the flow of electrical charge, or something that applies at the present time.",
     pairs: [
-      ["A swimmer notices the river carrying them sideways.", "A multimeter reads amperes."],
-      ["Yesterday’s schedule has been replaced by the one in effect now.", "The Gulf Stream moves warm water across an ocean."],
-      ["Closing the circuit lets charge flow.", "A breaking-news desk covers affairs happening right now."],
-      ["A diver watches little particles drift in one direction.", "A fuse opens when too much charge flows per second."],
-      ["The homepage lists the prices that apply today.", "A strong undertow surprises a beachgoer."],
-      ["A conductor completes a path back to the power source.", "Your train platform may change from the one in an old screenshot."],
-      ["A weather map traces moving air with arrows.", "The latest edition replaces an obsolete manual."],
-      ["A river bend can sweep a canoe toward its outer bank.", "A battery supplies direct flow instead of alternation."],
+      [
+        ["A swimmer notices the river carrying them sideways.", "A river current carries the swimmer downstream or sideways."],
+        ["A multimeter reads amperes.", "Amperes are the units of electric current."],
+      ],
+      [
+        ["Yesterday’s schedule has been replaced by the one in effect now.", "The schedule in effect now is the current one."],
+        ["The Gulf Stream moves warm water across an ocean.", "The Gulf Stream is a warm ocean current."],
+      ],
+      [
+        ["Closing the circuit lets charge flow.", "A closed circuit gives electric current a path to flow."],
+        ["A breaking-news desk covers affairs happening right now.", "Current affairs are events happening around the present time."],
+      ],
+      [
+        ["A diver watches little particles drift in one direction.", "Drifting particles show the direction of an underwater current."],
+        ["A fuse opens when too much charge flows per second.", "A fuse interrupts electric current when it exceeds a safe level."],
+      ],
+      [
+        ["The homepage lists the prices that apply today.", "The prices in effect today are the current prices."],
+        ["A strong undertow surprises a beachgoer.", "An undertow is a current flowing away from the shore beneath incoming waves."],
+      ],
+      [
+        ["A conductor completes a path back to the power source.", "A continuous conducting path lets electric current return to its source."],
+        ["Your train platform may change from the one in an old screenshot.", "The current platform is the assignment in effect now."],
+      ],
+      [
+        ["A weather map traces moving air with arrows.", "Air currents are streams of moving air."],
+        ["The latest edition replaces an obsolete manual.", "The latest edition is the current version."],
+      ],
+      [
+        ["A river bend can sweep a canoe toward its outer bank.", "A river’s current can push a canoe toward the outside of a bend."],
+        ["A battery supplies direct flow instead of alternation.", "Direct current flows in one direction."],
+      ],
     ],
   },
   {
     answer: "Draft",
     explanation: "A draft can be an early version of writing, a flow of cool air, or a selection process used by sports leagues.",
     pairs: [
-      ["An editor marks up a rough first version.", "A gap under the door lets cool air through."],
-      ["A team claims a player with the first pick.", "A writer moves paragraphs around before publishing."],
-      ["Air leaking around a window makes a candle flicker.", "A bartender pulls a handle to dispense beer from a keg."],
-      ["A message sits in the outbox editor before it is sent.", "Ships with deep hulls need more water below the surface."],
-      ["A racing driver follows another car to reduce air resistance.", "A league awards selection slots before its season begins."],
-      ["A manuscript has a version number and blank sections to fill.", "A chimney depends on upward-moving air."],
-      ["A brewer distinguishes a pint poured from a tap from one poured from a bottle.", "An artist's preliminary plans show where the walls will go."],
-      ["A strip of weather seal stops a cold flow through the front door.", "A coach scouts prospects before announcing a selection."],
+      [
+        ["An editor marks up a rough first version.", "A rough draft is an early version open to edits."],
+        ["A gap under the door lets cool air through.", "A draft is a stream of air through an opening."],
+      ],
+      [
+        ["A team claims a player with the first pick.", "A sports draft lets teams select eligible players in order."],
+        ["A writer moves paragraphs around before publishing.", "A writer can reorder paragraphs in a draft."],
+      ],
+      [
+        ["Air leaking around a window makes a candle flicker.", "A draft around the window makes the candle flame flicker."],
+        ["A bartender pulls a handle to dispense beer from a keg.", "Draft beer is served from a keg through a tap."],
+      ],
+      [
+        ["A message sits in the outbox editor before it is sent.", "A draft is a message that has been written and saved for later sending."],
+        ["Ships with deep hulls need more water below the surface.", "A ship’s draft measures how far its hull extends below the waterline."],
+      ],
+      [
+        ["A racing driver follows another car to reduce air resistance.", "Drafting behind another car can reduce aerodynamic drag."],
+        ["A league awards selection slots before its season begins.", "Draft slots tell teams when they can pick."],
+      ],
+      [
+        ["A manuscript has a version number and blank sections to fill.", "A manuscript draft can contain placeholders while the writer works."],
+        ["A chimney depends on upward-moving air.", "A chimney draft pulls gases upward."],
+      ],
+      [
+        ["A brewer distinguishes a pint poured from a tap from one poured from a bottle.", "Draft beer comes from a tap instead of a bottle."],
+        ["An artist's preliminary plans show where the walls will go.", "A preliminary drawing can be a draft of the layout."],
+      ],
+      [
+        ["A strip of weather seal stops a cold flow through the front door.", "Weather sealing stops a cold draft through the door."],
+        ["A coach scouts prospects before announcing a selection.", "Scouting helps a team prepare to select players in the draft."],
+      ],
     ],
   },
   {
     answer: "Frame",
     explanation: "A frame can surround a picture, be a single image in a video, or form the supporting structure of a bicycle.",
     pairs: [
-      ["A wooden border holds a photograph.", "A paused movie displays one image."],
-      ["Pedals, wheels, and handlebars attach to this bicycle structure.", "A bowling scorecard has ten turns of up to two ordinary rolls."],
-      ["A comic artist puts a scene inside one outlined panel.", "An optician fits lenses into a pair of rims."],
-      ["An architect draws the supporting skeleton of a building.", "A photographer moves a step so a tree fits inside the image edges."],
-      ["A filmmaker counts 24 individual images in a second.", "A picture hangs by a wire mounted to its border."],
-      ["A story’s setup changes how you interpret the events inside it.", "A welder joins tubes into a bicycle’s main structure."],
-      ["A screen capture freezes the exact moment a ball crosses a line.", "In bowling, a strike completes this unit on the first roll, except for possible bonus rolls in the tenth."],
-      ["A doorway's surrounding structure holds the hinges.", "A lawyer shapes the question so one interpretation sounds natural."],
+      [
+        ["A wooden border holds a photograph.", "A picture frame surrounds and holds the photograph."],
+        ["A paused movie displays one image.", "A paused video displays a single frame."],
+      ],
+      [
+        ["Pedals, wheels, and handlebars attach to this bicycle structure.", "The bicycle frame connects and supports its main parts."],
+        ["A bowling scorecard has ten turns of up to two ordinary rolls.", "A bowling game is divided into ten frames."],
+      ],
+      [
+        ["A comic artist puts a scene inside one outlined panel.", "A comic frame encloses a single scene."],
+        ["An optician fits lenses into a pair of rims.", "Eyeglass frames hold the lenses."],
+      ],
+      [
+        ["An architect draws the supporting skeleton of a building.", "A building frame is the skeleton supporting the structure."],
+        ["A photographer moves a step so a tree fits inside the image edges.", "Changing the framing can put the tree inside the composition."],
+      ],
+      [
+        ["A filmmaker counts 24 individual images in a second.", "Each of those individual film images is a frame."],
+        ["A picture hangs by a wire mounted to its border.", "A wire fixed to the picture frame lets it hang."],
+      ],
+      [
+        ["A story’s setup changes how you interpret the events inside it.", "A story’s framing changes how the audience interprets it."],
+        ["A welder joins tubes into a bicycle’s main structure.", "The welded bicycle frame supports the major components."],
+      ],
+      [
+        ["A screen capture freezes the exact moment a ball crosses a line.", "A screenshot captures one frame of a moving sequence."],
+        ["In bowling, a strike completes this unit on the first roll, except for possible bonus rolls in the tenth.", "A strike usually finishes a bowling frame on its first roll."],
+      ],
+      [
+        ["A doorway's surrounding structure holds the hinges.", "A door frame surrounds the door and supports its hinges."],
+        ["A lawyer shapes the question so one interpretation sounds natural.", "How the lawyer frames the question can suggest an interpretation."],
+      ],
     ],
   },
   {
     answer: "Root",
     explanation: "A root can anchor a plant, be a base form of a word, or be a value that solves an equation when the expression equals zero.",
     pairs: [
-      ["A plant draws water through fine underground strands.", "The square of 7 is 49, making 7 one answer to an inverse-power question."],
-      ["A linguist removes endings to find the word’s base.", "A tree’s support spreads under the pavement."],
-      ["A calculator uses a radical sign to show the operation.", "A dentist cleans a canal beneath the tooth’s crown."],
-      ["A genealogist looks for where a family line began.", "A quadratic graph crosses the x-axis at a solution."],
-      ["The top-level directory contains every other directory under it.", "A carrot is the part of the plant eaten underground."],
-      ["A poet hears the same base in two words with different suffixes.", "A gardener loosens the buried part before repotting."],
-      ["A postmortem asks for the underlying cause of a failure.", "The value that makes x³ equal 27 is 3."],
-      ["A supporter cheers for the home team.", "The account with the broadest privileges on a Unix system."],
+      [
+        ["A plant draws water through fine underground strands.", "Fine roots absorb water from the soil."],
+        ["The square of 7 is 49, making 7 one answer to an inverse-power question.", "Seven is a square root of 49."],
+      ],
+      [
+        ["A linguist removes endings to find the word’s base.", "A word’s root is its base, before the added endings."],
+        ["A tree’s support spreads under the pavement.", "Tree roots spread underground to anchor the trunk."],
+      ],
+      [
+        ["A calculator uses a radical sign to show the operation.", "A radical sign denotes a root, such as a square root."],
+        ["A dentist cleans a canal beneath the tooth’s crown.", "A root canal runs through the part of a tooth beneath its crown."],
+      ],
+      [
+        ["A genealogist looks for where a family line began.", "A family’s roots are its origins."],
+        ["A quadratic graph crosses the x-axis at a solution.", "At an x-intercept, the function is zero and the x-value is a root."],
+      ],
+      [
+        ["The top-level directory contains every other directory under it.", "The root directory is at the top of a file system."],
+        ["A carrot is the part of the plant eaten underground.", "The edible portion of a carrot is its enlarged taproot."],
+      ],
+      [
+        ["A poet hears the same base in two words with different suffixes.", "Different suffixes can attach to the same root word."],
+        ["A gardener loosens the buried part before repotting.", "Loosening the roots helps them spread in their new pot."],
+      ],
+      [
+        ["A postmortem asks for the underlying cause of a failure.", "A root cause is the underlying reason the failure occurred."],
+        ["The value that makes x³ equal 27 is 3.", "Three is the cube root of 27."],
+      ],
+      [
+        ["A supporter cheers for the home team.", "To root for a team is to cheer for it."],
+        ["The account with the broadest privileges on a Unix system.", "The root user is the Unix superuser."],
+      ],
     ],
   },
   {
     answer: "Track",
     explanation: "A track can carry a train, define a running course, or be one recording in a playlist.",
     pairs: [
-      ["A train follows two steel rails.", "A playlist skips to its next song."],
-      ["A runner stays inside a marked lane around an oval.", "A ranger follows impressions left in mud."],
-      ["A producer isolates the vocal recording from the instruments.", "A tank rolls on continuous metal treads."],
-      ["A courier’s progress can be followed by scanning a parcel.", "A railway switch sends a carriage down a different path."],
-      ["A cyclist rides a banked circuit indoors.", "A hunter studies which direction the prints point."],
-      ["A stage recording has separate audio layers.", "A sleigh leaves a long mark in new snow."],
-      ["A school offers an accelerated route through its classes.", "A project manager follows whether a deadline is still achievable."],
-      ["A satellite receiver follows the position of an object over time.", "A numbered list on the album sleeve names each recording."],
+      [
+        ["A train follows two steel rails.", "The rails form the track that guides the train."],
+        ["A playlist skips to its next song.", "Each song is a track in the playlist."],
+      ],
+      [
+        ["A runner stays inside a marked lane around an oval.", "The marked lanes form a running track."],
+        ["A ranger follows impressions left in mud.", "The impressions are tracks left by an animal or person."],
+      ],
+      [
+        ["A producer isolates the vocal recording from the instruments.", "A vocal track contains the voice apart from the other audio layers."],
+        ["A tank rolls on continuous metal treads.", "A tank moves on continuous tracks."],
+      ],
+      [
+        ["A courier’s progress can be followed by scanning a parcel.", "A scan lets people track the parcel’s progress."],
+        ["A railway switch sends a carriage down a different path.", "A switch directs the carriage onto a different track."],
+      ],
+      [
+        ["A cyclist rides a banked circuit indoors.", "The banked circuit is a cycling track."],
+        ["A hunter studies which direction the prints point.", "The direction of the animal’s tracks shows where it went."],
+      ],
+      [
+        ["A stage recording has separate audio layers.", "Each separate layer of a recording is an audio track."],
+        ["A sleigh leaves a long mark in new snow.", "The runners of the sleigh leave tracks in the snow."],
+      ],
+      [
+        ["A school offers an accelerated route through its classes.", "An accelerated track is a path through a school’s classes."],
+        ["A project manager follows whether a deadline is still achievable.", "Tracking a deadline means following progress toward it."],
+      ],
+      [
+        ["A satellite receiver follows the position of an object over time.", "Tracking an object means following its position over time."],
+        ["A numbered list on the album sleeve names each recording.", "The album’s track list names its individual recordings."],
+      ],
     ],
   },
 ];
@@ -154,8 +351,19 @@ function normalize(answer: string) {
 function choosePuzzles() {
   const choices = [...PUZZLES];
   const selected: Puzzle[] = [];
-  while (selected.length < ROUNDS) selected.push(choices.splice(randomInt(choices.length), 1)[0]);
+  while (selected.length < ROUNDS) {
+    const { answer, explanation, pairs } = choices.splice(randomInt(choices.length), 1)[0];
+    selected.push({
+      answer,
+      explanation,
+      pairs: pairs.map(([[first], [second]]) => [first, second]),
+    });
+  }
   return selected;
+}
+
+function pairFor(puzzle: Puzzle, round: number, seat: number) {
+  return puzzle.pairs[(seat + round) % puzzle.pairs.length];
 }
 
 function finishRound(state: State, result: NonNullable<State["result"]>): State {
@@ -226,7 +434,7 @@ function view(state: State, context: GameContext): GameView {
   switch (state.phase) {
     case "puzzle": {
       const expired = context.now >= state.deadline;
-      const pair = puzzle.pairs[(seat + state.round) % puzzle.pairs.length];
+      const pair = pairFor(puzzle, state.round, seat);
       const controls: GameControl[] = expired
         ? [{ id: actionId("reveal", state), label: "Reveal the connection" }]
         : [{ id: actionId("guess", state), label: "Submit team answer", fields: [
@@ -246,11 +454,20 @@ function view(state: State, context: GameContext): GameView {
     }
     case "reveal": {
       const headings = { solved: "Thread found", strikes: "Out of strikes", expired: "Time ran out" };
+      const authored = PUZZLES.find(({ answer }) => answer === puzzle.answer);
+      const connections = new Map(authored?.pairs.flat());
+      const clueCards = context.players.map(({ name }, index) => ({
+        title: `${name}’s clues`,
+        items: pairFor(puzzle, state.round, index).map((fragment) => {
+          const connection = connections.get(fragment);
+          return connection ? `${fragment} — ${connection}` : fragment;
+        }),
+      }));
       return {
         phase: state.phase,
         round,
         heading: headings[state.result ?? "expired"],
-        cards: [{ title: puzzle.answer, body: puzzle.explanation }, ...previousGuesses, progress],
+        cards: [{ title: puzzle.answer, body: puzzle.explanation }, ...clueCards, ...previousGuesses, progress],
         controls: context.actorId === context.hostId
           ? [{ id: actionId("next", state), label: state.round === ROUNDS - 1 ? "See session results" : "Start next puzzle" }]
           : [],

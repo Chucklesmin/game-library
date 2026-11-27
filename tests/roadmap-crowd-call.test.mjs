@@ -88,6 +88,10 @@ test("stable tied leaders, abstentions, and a zero-ballot round score correctly"
   const reveal = game.view(state, context(2));
   assert.match(reveal.detail, /tied for the lead/);
   assert.equal(reveal.cards[0].items.filter((item) => item.includes("Leading answer")).length, 2);
+  assert.match(reveal.cards[0].body, /3 predictions · 2 votes/);
+  assert.match(reveal.cards[0].body, /Most underestimated: The pinball machine \(\+16\.7 percentage points\)/);
+  assert.match(reveal.cards[0].items[0], /1 prediction \(33\.3%\) · 1 vote \(50%\)/);
+  assert.match(reveal.cards[0].items[1], /2 predictions \(66\.7%\) · 1 vote \(50%\)/);
   assert.deepEqual(reveal.standings.map(({ score }) => score), [3, 3, 2]);
   assert.deepEqual(reveal.privateCards.at(-1), {
     title: "Your round score", body: "+2", items: ["Prediction · +2", "No vote · +0"],
@@ -104,11 +108,30 @@ test("stable tied leaders, abstentions, and a zero-ballot round score correctly"
   state = move(state, "Reveal tally");
   const empty = game.view(state, context(1));
   assert.match(empty.detail, /nobody earned points/i);
+  assert.doesNotMatch(empty.cards[0].body, /Most underestimated/);
   assert.equal(empty.cards[0].items.every((item) => item.endsWith("0 votes")), true);
   assert.deepEqual(empty.standings.map(({ score }) => score), [3, 3, 2]);
   assert.deepEqual(empty.privateCards.at(-1), {
     title: "Your round score", body: "+0", items: ["No prediction · +0", "No vote · +0"],
   });
+});
+
+test("shows all equally underestimated choices and skips comparisons without both samples", () => {
+  let state = game.create(context());
+  state = move(state, "Lock prediction", 0, "0");
+  state = move(state, "Open voting");
+  state = move(state, "Lock vote", 0, "1");
+  state = move(state, "Lock vote", 2, "2");
+  state = move(state, "Reveal tally");
+  const reveal = game.view(state, context(2));
+  assert.match(reveal.cards[0].body, /Most underestimated: The racing cabinet \/ The claw machine \(\+50 percentage points\)/);
+  state = move(state, "Next prompt");
+  state = move(state, "Open voting");
+  state = move(state, "Lock vote", 1, "0");
+  state = move(state, "Reveal tally");
+  const noPredictions = game.view(state, context());
+  assert.equal(noPredictions.cards[0].body, "0 predictions · 1 vote.");
+  assert.match(noPredictions.cards[0].items[0], /0 predictions · 1 vote \(100%\)/);
 });
 
 test("rejects non-host, outsider, invalid, stale and duplicate moves", () => {
@@ -151,4 +174,5 @@ test("supports the 12-player maximum and prevents out-of-range starts", () => {
   const reveal = game.view(state, context(11, 12));
   assert.deepEqual(reveal.standings.map(({ score }) => score), Array(12).fill(3));
   assert.match(reveal.cards[0].items[0], /12 votes/);
+  assert.doesNotMatch(reveal.cards[0].body, /Most underestimated/);
 });

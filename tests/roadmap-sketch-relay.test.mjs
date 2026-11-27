@@ -125,14 +125,25 @@ test("first matching description scores once, guesses have private feedback, and
   const incorrect = act(active, "guess-1", { guess: "snowman" }, "b", 1100);
   assert.match(game.view(incorrect, context("b", 1100)).detail, /didn’t match/);
   assert.doesNotMatch(game.view(incorrect, context("c", 1100)).detail, /didn’t match/);
+  assert.equal(game.view(incorrect, context("c", 1100)).cards, undefined);
   assert.ok(!JSON.stringify(incorrect).includes("snowman"));
   assert.throws(() => act(incorrect, "guess-1", { guess: "a snowman with a scarf" }, "b", 1700), /moment/);
   assert.throws(() => act(active, "guess-1", { guess: "!!!" }, "c", 1701), /Enter a guess/);
   assert.throws(() => act(active, "guess-1", { guess: "b".repeat(73) }, "c", 1701), /Enter a guess/);
 
-  const solved = act(incorrect, "guess-1", { guess: "SCARF on a snow person!" }, "b", 1750);
+  const painted = save(incorrect, stroke(), 1700);
+  const solved = act(painted, "guess-1", { guess: "SCARF on a snow person!" }, "b", 1750);
   assert.deepEqual(solved.scores, { a: 1, b: 2, c: 0 });
-  assert.match(game.view(solved, context("c", 1750)).cards[0].body, /snowman/);
+  for (const { id } of players) {
+    const recap = game.view(clone(solved), context(id, 1750));
+    assert.deepEqual(recap.cards[0], {
+      title: "The scene", body: "A snowman with a scarf", items: ["First correct guess by Bo — “SCARF on a snow person!”"],
+    });
+    assert.deepEqual(recap.drawing, { strokes: [stroke()] });
+  }
+  const legacy = clone(solved);
+  delete legacy.result.guess;
+  assert.deepEqual(game.view(legacy, context("c", 1750)).cards[0].items, ["First correct guess by Bo"]);
   assert.throws(() => act(solved, "guess-1", { guess: "a snowman with a scarf" }, "c", 1750), /not available/);
   assert.throws(() => act(solved, "next-1", {}, "b"), /not available/);
 
@@ -143,7 +154,9 @@ test("first matching description scores once, guesses have private feedback, and
   assert.equal(expiredView.controls[0].id, "expire-1");
   const expired = act(active, "expire-1", {}, "b", deadline);
   assert.deepEqual(expired.scores, { a: 0, b: 0, c: 0 });
-  assert.equal(game.view(expired, context("b", deadline)).cards[0].body, "A snowman with a scarf");
+  const expiredRecap = game.view(expired, context("b", deadline)).cards[0];
+  assert.equal(expiredRecap.body, "A snowman with a scarf");
+  assert.deepEqual(expiredRecap.items, ["No correct guess this turn"]);
 });
 
 test("rotates every artist in a full match, resets the drawing, and supports a shared first place", () => {
@@ -166,9 +179,12 @@ test("rotates every artist in a full match, resets the drawing, and supports a s
   assert.equal(final.finished, true);
   assert.deepEqual(final.controls, []);
   assert.deepEqual(final.standings.map((entry) => entry.score), [3, 3, 3]);
+  assert.deepEqual(final.cards[0].items, [`First correct guess by Ari — “${final.cards[0].body}”`]);
+  assert.deepEqual(final.drawing, { strokes: [stroke()] });
   assert.equal(final.cards[1].title, "Shared first place");
   assert.throws(() => act(state, "next-3", {}, "a", 40_000), /not available/);
   const skipped = act(choose(), "skip-1", {}, "a");
   assert.equal(skipped.result.kind, "skipped");
+  assert.deepEqual(game.view(skipped, context("b")).cards[0].items, ["No correct guess this turn"]);
   assert.deepEqual(skipped.scores, { a: 0, b: 0, c: 0 });
 });
