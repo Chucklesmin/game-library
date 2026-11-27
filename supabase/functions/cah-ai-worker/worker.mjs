@@ -59,9 +59,23 @@ export function legalFallback(payload) {
   return choice ? { choiceId: choice.id, fallback: true } : null;
 }
 
+const DEFAULT_MODEL = 'nvidia/nemotron-3.5-lightning-30b-a3b';
+
 export async function decide(payload, { apiKey, playerModel, judgeModel, fetcher = fetch, sleep = ms => new Promise(r => setTimeout(r, ms)), timeoutMs = 15000 } = {}) {
   if (!['submit', 'vote', 'judge'].includes(payload?.kind)) return { result: null, error: 'invalid_job' };
   if (!apiKey) return { result: legalFallback(payload), error: 'nvidia_not_configured' };
+  const isJudge = payload.kind === 'judge';
+  const model = (isJudge ? judgeModel : playerModel) || DEFAULT_MODEL;
+  const body = {
+    model,
+    messages: makeMessages(payload),
+    temperature: isJudge ? .2 : .75,
+    max_tokens: isJudge ? 2200 : 1200,
+    stream: false,
+  };
+  if (model === DEFAULT_MODEL) body.chat_template_kwargs = { enable_thinking: false };
+  if (model.includes('gpt-oss')) body.reasoning_effort = 'low';
+
   for (let attempt = 0; attempt < 2; attempt++) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -69,16 +83,16 @@ export async function decide(payload, { apiKey, playerModel, judgeModel, fetcher
       const response = await fetcher('https://integrate.api.nvidia.com/v1/chat/completions', {
         method: 'POST', signal: controller.signal,
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: (payload.kind === 'judge' ? judgeModel : playerModel) || 'openai/gpt-oss-20b', messages: makeMessages(payload), temperature: payload.kind === 'judge' ? .2 : .75, max_tokens: payload.kind === 'judge' ? 2200 : 1200, stream: false, ...(!((payload.kind === 'judge' ? judgeModel : playerModel) || '').length || ((payload.kind === 'judge' ? judgeModel : playerModel) || '').includes('gpt-oss') ? { reasoning_effort: 'low' } : {}) }),
+        body: JSON.stringify(body),
       });
       if (!response.ok) {
         if ((response.status === 429 || response.status >= 500) && attempt === 0) { await sleep(500); continue; }
         throw new Error(`nvidia_http_${response.status}`);
       }
-      const body = await response.json();
-      const choice = body?.choices?.[0];
+      const completion = await response.json();
+      const choice = completion?.choices?.[0];
       if (choice?.message?.refusal || choice?.finish_reason !== 'stop') throw new Error('nvidia_incomplete_or_refused');
-      return { result: parseDecision(choice.message.content, payload), error: null, usage: { inputTokens: body.usage?.prompt_tokens ?? 0, outputTokens: body.usage?.completion_tokens ?? 0 } };
+      return { result: parseDecision(choice.message.content, payload), error: null, usage: { inputTokens: completion.usage?.prompt_tokens ?? 0, outputTokens: completion.usage?.completion_tokens ?? 0 } };
     } catch (error) {
       const code = controller.signal.aborted ? 'nvidia_timeout' : /^nvidia_/.test(error.message ?? '') ? error.message : 'nvidia_invalid_response';
       return { result: legalFallback(payload), error: code };
