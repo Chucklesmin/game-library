@@ -2,7 +2,7 @@
 
 ## AI worker configuration
 
-The browser never receives the NVIDIA credential. Set `NVIDIA_API_KEY` as a Supabase Edge Function secret for `cah-ai-worker`. Optional server secrets `NVIDIA_PLAYER_MODEL` and `NVIDIA_JUDGE_MODEL` select OpenAI-compatible NVIDIA model IDs; defaults are `openai/gpt-oss-20b`. Redeploy the function after changing its code, not after changing a Supabase secret.
+The browser never receives the NVIDIA credential. Set `NVIDIA_API_KEY` as a Supabase Edge Function secret for `cah-ai-worker`. Optional server secrets `NVIDIA_PLAYER_MODEL` and `NVIDIA_JUDGE_MODEL` select OpenAI-compatible NVIDIA model IDs. Both default to `nvidia/nemotron-3.5-lightning-30b-a3b`. Redeploy the function after changing its code, not after changing a Supabase secret.
 
 The worker is awakened by database `pg_net` calls. Its URL is held in `private.cah_worker_settings`; a null URL disables wakes. The recovery cron runs once a minute. Never put the API key in SQL, browser variables, logs, or this file.
 
@@ -27,7 +27,7 @@ Run `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and the lo
 
 ## NVIDIA model maintenance
 
-The code defaults to `openai/gpt-oss-20b`; `NVIDIA_PLAYER_MODEL` and `NVIDIA_JUDGE_MODEL` can override it independently. Before changing a model, verify it is currently available to the configured NVIDIA account and supports the OpenAI-compatible chat-completions request used by `cah-ai-worker`. Update the default/override as appropriate, review the bounded timeouts and output schema, and redeploy the Edge Function when code changes. Keep `NVIDIA_API_KEY` in Edge Function secrets only.
+The worker disables thinking on the default model to leave the completion budget available for the card choice or judge JSON. `NVIDIA_PLAYER_MODEL` and `NVIDIA_JUDGE_MODEL` can override the model independently. Before changing a model, verify it is currently available to the configured NVIDIA account and supports the OpenAI-compatible chat-completions request used by `cah-ai-worker`. Update the default or override as appropriate, review the bounded timeouts and output schema, and redeploy the Edge Function when code changes. Keep `NVIDIA_API_KEY` in Edge Function secrets only.
 
 After a model or timeout change, wake a controlled fresh room with two bot players and AI judging. Verify both player jobs and the judge job finish with `fallback=false`, the chosen submission and explanation render, SQL awards the expected score, and latency fits the worker deadline. Also confirm provider errors still produce the disclosed bot fallback or host-selectable crowd recovery. Inspect job status and budget counters without exposing payloads; clean up only the identified synthetic QA room after recording results. A configured secret or successful worker health response alone does not prove model inference works.
 

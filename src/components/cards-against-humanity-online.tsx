@@ -79,7 +79,14 @@ export function CardsAgainstHumanityOnline({ displayName }: { displayName: strin
       void listRoomPlayers(room.id).then(setPlayers).catch((error: unknown) => setMessage(readableErrorMessage(error, "Could not load the room roster.")));
       initialRefresh = window.setTimeout(() => { void refresh(); }, 0);
       stopRoom = subscribeToRoom(room.id, () => { void refresh(); }, updateLiveStatus);
-      stopPlayers = subscribeToRoomPlayers(room.id, setPlayers);
+      stopPlayers = subscribeToRoomPlayers(room.id, (nextPlayers) => {
+        if (cancelled) return;
+        setPlayers(nextPlayers);
+        // A guest joining changes room_players without updating the room row.
+        void refresh();
+      }, (status) => {
+        if (status === "SUBSCRIBED" && !cancelled) void refresh();
+      });
     }).catch((error: unknown) => setMessage(readableErrorMessage(error, "Could not reconnect to this room.")));
     return () => {
       cancelled = true;
