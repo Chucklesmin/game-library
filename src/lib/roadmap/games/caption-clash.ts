@@ -269,7 +269,7 @@ export const game: GameDefinition<CaptionState> = {
       const anonymous = ballots(state);
       const locked = Object.hasOwn(state.votes, actorId);
       const yourVote = anonymous.find((ballot) => ballot.id === state.votes[actorId]);
-      if (yourVote) privateCards.push({ title: "Your locked vote", body: yourVote.label });
+      if (yourVote) privateCards.push({ title: "Your locked vote", body: `${yourVote.label} · ${yourVote.text}` });
       if (locked && !yourVote) privateCards.push({ title: "You abstained" });
       if (isOpen(state, now) && !locked) {
         controls.push({
@@ -278,7 +278,7 @@ export const game: GameDefinition<CaptionState> = {
           fields: [{
             name: "ballot", label: "Pick a favorite", type: "select",
             options: anonymous.filter((ballot) => ballot.authorId !== actorId)
-              .map(({ id, label }) => ({ value: id, label })),
+              .map(({ id, label, text }) => ({ value: id, label: `${label} · ${text}` })),
           }],
         }, { id: "abstain", label: "Abstain" });
       }

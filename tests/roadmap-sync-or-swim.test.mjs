@@ -55,7 +55,8 @@ test("a locked answer is immutable and projects no pre-reveal choice to either p
     const view = game.view(revealed, context(id));
     assert.equal(view.heading, "In sync!");
     assert.equal(score(view, "Current streak"), 1);
-    assert.deepEqual(view.cards.slice(1).map(({ body }) => body), [answers[0].label, answers[0].label]);
+    assert.deepEqual(view.cards.slice(1, 3).map(({ body }) => body), [answers[0].label, answers[0].label]);
+    assert.deepEqual(view.cards.at(-1).items, ["Round 1 · Matched"]);
   }
   assert.throws(() => act(revealed, "second", "choose-1", { choice: "0" }), /no longer available/);
 });
@@ -80,6 +81,7 @@ test("predictions are optional, one-time, and private until both choices reveal"
   assert.equal(score(view, "Correct predictions"), 1);
   assert.deepEqual(view.cards[1].items, ["Prediction: Different choices · Correct"]);
   assert.equal(view.cards[2].items, undefined);
+  assert.deepEqual(view.cards.at(-1).items, ["Round 1 · Matched", "Round 2 · Different picks"]);
 
   const third = act(revealed, "second", "next-2");
   assert.throws(() => act(third, "second", "next-2"), /no longer available/);
@@ -102,11 +104,29 @@ test("either player can resolve a deadline, late choices are rejected, and missi
   const expired = act(locked, "second", "reveal-2", {}, deadline);
   const view = game.view(expired, context("second", deadline));
   assert.equal(view.heading, "Time ran out");
+  assert.deepEqual(view.cards.at(-1).items, ["Round 1 · Matched", "Round 2 · Timed out"]);
   assert.equal(view.cards[2].body, "No choice");
   assert.deepEqual(view.cards[1].items, ["Prediction: Different choices · Void"]);
   assert.equal(score(view, "Current streak"), 0);
   assert.equal(score(view, "Correct predictions"), 0);
   assert.throws(() => act(expired, "second", "reveal-2", {}, deadline), /no longer available/);
+});
+
+test("a restored legacy room keeps only outcomes still available from its current round", () => {
+  const first = playChoices(game.create(context()), 1, "1", "1");
+  let second = act(first, "first", "next-1");
+  second = act(second, "first", "predict-skip-2");
+  second = act(second, "second", "predict-skip-2");
+  const oldReveal = JSON.parse(JSON.stringify(playChoices(second, 2, "1", "2")));
+  delete oldReveal.history;
+  const restored = game.view(oldReveal, context()).cards.at(-1);
+  assert.deepEqual(restored.items, ["Round 2 · Different picks"]);
+  assert.match(restored.body, /Earlier round results were not recorded/);
+
+  const third = act(oldReveal, "first", "next-2");
+  assert.equal(game.view(third, context()).cards, undefined);
+  const final = game.view(playChoices(third, 3, "1", "1"), context("second"));
+  assert.deepEqual(final.cards.at(-1).items, ["Round 2 · Different picks", "Round 3 · Matched"]);
 });
 
 test("a six-prompt cooperative session reaches its best-streak goal, then closes", () => {
@@ -129,6 +149,10 @@ test("a six-prompt cooperative session reaches its best-streak goal, then closes
   assert.equal(score(final, "Best streak"), 3);
   assert.equal(score(final, "Matching rounds"), 5);
   assert.equal(score(final, "Correct predictions"), 2);
+  assert.deepEqual(final.cards.at(-1).items, [
+    "Round 1 · Matched", "Round 2 · Matched", "Round 3 · Matched",
+    "Round 4 · Different picks", "Round 5 · Matched", "Round 6 · Matched",
+  ]);
   assert.deepEqual(final.controls, []);
   assert.throws(() => act(state, "first", "next-6"), /no longer available/);
 });

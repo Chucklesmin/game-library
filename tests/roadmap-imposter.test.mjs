@@ -75,6 +75,9 @@ test("allows only the active clue player and keeps late or repeated actions out"
   const state = move(fixture, host, "start-clues");
   const first = select(state, host, "clue").id;
   const second = room[1].id;
+  const order = (gameState, actor, now) => current(gameState, actor, now).cards.find(({ title }) => title === "Clue turn order").items;
+  assert.deepEqual(order(state, host), ["Guest 1 · Up now", "Guest 2 · Waiting", "Guest 3 · Waiting", "Guest 4 · Waiting"]);
+  assert.deepEqual(order(state, host), order(state, room[3].id));
   assert.throws(() => game.act(state, context(second), { id: first, values: { clue: "something" } }), /unavailable/);
   const word = current(state, host).privateCards[0].body;
   assert.throws(() => game.act(state, context(), { id: first, values: { clue: `Looks like the ${word}!` } }), /secret word/);
@@ -84,6 +87,12 @@ test("allows only the active clue player and keeps late or repeated actions out"
   assert.deepEqual(state.clues, {});
   assert.throws(() => game.act(next, context(), { id: first, values: { clue: "old clue" } }), /unavailable/);
   assert.equal(current(next, second, state.deadline).heading, "Your clue turn");
+  const clueAction = select(next, second, "clue", state.deadline);
+  const afterClue = game.act(next, context(second, state.deadline), { id: clueAction.id, values: { clue: "Quiet hint" } });
+  const refreshed = JSON.parse(JSON.stringify(afterClue));
+  const expected = ["Guest 1 · Passed", "Guest 2 · Clue shared", "Guest 3 · Up now", "Guest 4 · Waiting"];
+  assert.deepEqual(order(refreshed, room[3].id, state.deadline), expected);
+  assert.deepEqual(order(refreshed, second, state.deadline), expected);
 });
 
 test("keeps votes private, rejects self-votes and scores a tied vote for the imposter", () => {

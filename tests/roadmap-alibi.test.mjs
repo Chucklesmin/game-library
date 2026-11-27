@@ -76,6 +76,17 @@ test("keeps all accusations sealed, rejects repeat/self/unknown votes, and score
   assert.ok(result.cards.every((card) => !card.items?.some((item) => item.includes("voted for"))));
 });
 
+test("each player sees the same speaking order and progress, including shared alibis and passes", () => {
+  let state = move(initial(), "Start alibis");
+  const order = (active, actorId) => projection(active, context(actorId)).cards.find(({ title }) => title === "Speaking order").items;
+  assert.deepEqual(order(state, players[3].id), ["Guest 0 · Up now", "Guest 1 · Waiting", "Guest 2 · Waiting", "Guest 3 · Waiting"]);
+  state = move(state, "Share alibi", { statement: "I checked in before the shift." });
+  state = move(state, "Pass this turn", {}, context(players[1].id));
+  const refreshed = JSON.parse(JSON.stringify(state));
+  const expected = ["Guest 0 · Alibi shared", "Guest 1 · Passed", "Guest 2 · Up now", "Guest 3 · Waiting"];
+  for (const { id } of players.slice(0, 4)) assert.deepEqual(order(refreshed, id), expected);
+});
+
 test("times out inactive steps, rejects wrong speakers and stale moves, and awards the mismatch when no one votes", () => {
   let state = move(initial(), "Start alibis");
   const [first, second, third] = state.players;

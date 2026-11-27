@@ -130,8 +130,8 @@ function reader(state: State) {
   return state.players[state.round % state.players.length];
 }
 
-function activeSpeaker(state: State) {
-  return state.players[(state.round + state.speaker) % state.players.length];
+function activeSpeaker(state: State, speaker = state.speaker) {
+  return state.players[(state.round + speaker) % state.players.length];
 }
 
 function currentCase(state: State) {
@@ -315,6 +315,17 @@ function view(state: State, context: GameContext): GameView {
   }
 
   board.privateCards = [recordCard(state, context.actorId)];
+  if (state.stage === "alibis") {
+    board.cards?.push({
+      title: "Speaking order",
+      items: state.players.map((_, index) => {
+        const id = activeSpeaker(state, index);
+        const status = Object.hasOwn(state.statements, id) ? (state.statements[id] === null ? "Passed" : "Alibi shared")
+          : index === state.speaker ? "Up now" : "Waiting";
+        return `${name(context, id)} · ${status}`;
+      }),
+    });
+  }
   board.cards?.push(...alibiCards(state, context));
   if (state.stage === "briefing") {
     return { ...board, heading: "Read your shift packet", detail: `${name(context, reader(state))} reads the incident aloud and starts the alibis.` };

@@ -219,6 +219,10 @@ function view(state: State, context: GameContext): GameView {
     items: [`${state.streak} in a row`, `${state.bestStreak} best streak`, `${state.solves} solved of ${ROUNDS}`],
   };
 
+  const previousGuesses = state.wrongGuesses.length
+    ? [{ title: "Previous guesses", items: state.wrongGuesses }]
+    : [];
+
   switch (state.phase) {
     case "puzzle": {
       const expired = context.now >= state.deadline;
@@ -236,7 +240,7 @@ function view(state: State, context: GameContext): GameView {
           : "Describe your clues aloud. Agree before one teammate submits an answer.",
         deadline: state.deadline,
         privateCards: [{ title: "Your two clue fragments", items: [...pair] }],
-        cards: [{ title: "Strikes left", body: `Remaining: ${MAX_STRIKES - state.wrongGuesses.length} of ${MAX_STRIKES}` }, progress],
+        cards: [{ title: "Strikes left", body: `Remaining: ${MAX_STRIKES - state.wrongGuesses.length} of ${MAX_STRIKES}` }, ...previousGuesses, progress],
         controls,
       };
     }
@@ -246,7 +250,7 @@ function view(state: State, context: GameContext): GameView {
         phase: state.phase,
         round,
         heading: headings[state.result ?? "expired"],
-        cards: [{ title: puzzle.answer, body: puzzle.explanation }, progress],
+        cards: [{ title: puzzle.answer, body: puzzle.explanation }, ...previousGuesses, progress],
         controls: context.actorId === context.hostId
           ? [{ id: actionId("next", state), label: state.round === ROUNDS - 1 ? "See session results" : "Start next puzzle" }]
           : [],

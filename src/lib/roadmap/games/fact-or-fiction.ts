@@ -308,6 +308,11 @@ export const game: GameDefinition<State> = {
       };
     }
     const complete = state.phase === "complete";
+    const ballot = Object.hasOwn(state.ballots, context.actorId) ? state.ballots[context.actorId] : undefined;
+    const points = roundScore(ballot, fact.truth);
+    const personalResult = ballot
+      ? `${ballot.verdict === fact.truth ? "Correct" : "Incorrect"} verdict with ${ballot.confidence === "bold" ? "Bold" : "Steady"} confidence.`
+      : "You left this statement unanswered.";
     const leaders = standings.filter(({ score }) => score === standings[0].score).map(({ label }) => label);
     const cards = [
       {
@@ -331,6 +336,7 @@ export const game: GameDefinition<State> = {
       heading: complete ? "Final standings" : verdictText(fact.truth),
       detail: complete ? (leaders.length === 1 ? `${leaders[0]} wins.` : `${leaders.join(", ")} share first place.`)
         : fact.statement,
+      privateCards: [{ title: "Your round score", body: `${scoreText(points)} ${Math.abs(points) === 1 ? "point" : "points"}. ${personalResult}` }],
       cards: complete ? [{ title: "Final statement", body: fact.statement }, ...cards] : cards,
       controls: !complete && context.actorId === state.hostId ? [{ id: actionId(state, "next"), label: "Next statement" }] : [],
       finished: complete,

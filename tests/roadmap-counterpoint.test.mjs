@@ -40,6 +40,7 @@ test("requires exactly two seats and host initiation", () => {
 
 test("orders speeches, rejects illegal or stale moves and preserves previous state", () => {
   const state = game.create(context());
+  assert.equal(look(state).cards.some(({ title }) => title === "Speech progress"), false);
   assert.match(look(state, 0).detail, /you’re arguing for/i);
   assert.match(look(state, 1).detail, /you’re arguing against/i);
   const readyId = control(state, 0, "Ready to debate").id;
@@ -47,6 +48,10 @@ test("orders speeches, rejects illegal or stale moves and preserves previous sta
   assert.deepEqual(state.ready, [false, false]);
   assert.throws(() => game.act(afterReady, context(), { id: readyId, values: {} }), /already ready/i);
   const opened = act(afterReady, 1, "Ready to debate");
+  assert.deepEqual(look(opened).cards.find(({ title }) => title === "Speech progress").items, [
+    "Ari · Argument: due now · Rebuttal: still due",
+    "Bo · Argument: still due · Rebuttal: still due",
+  ]);
   const submit = control(opened, 0, "Submit argument");
   assert.equal(look(opened, 1).controls.length, 0);
   const invalid = (value) => game.act(opened, context(), { id: submit.id, values: { text: value } });
@@ -56,6 +61,10 @@ test("orders speeches, rejects illegal or stale moves and preserves previous sta
   const response = act(opened, 0, "Submit argument", { text: "  A readable case.  " });
   assert.equal(response.arguments[0], "A readable case.");
   assert.equal(look(response, 1).cards[1].body, "A readable case.");
+  assert.deepEqual(look(response, 1).cards.find(({ title }) => title === "Speech progress").items, [
+    "Ari · Argument: submitted · Rebuttal: still due",
+    "Bo · Argument: due now · Rebuttal: still due",
+  ]);
   assert.throws(() => game.act(response, context(0), { id: submit.id, values: { text: "Repeated" } }), /different step/i);
   assert.throws(() => game.act(response, { ...context(), actorId: "outside" }, { id: submit.id, values: {} }), /these two/i);
   assert.throws(() => game.view(response, { ...context(), actorId: "outside" }), /these two/i);
@@ -103,6 +112,9 @@ test("expires preparation, speeches and predictions and permits recovery by eith
   state = act(state, 0, "Pass this turn", {}, state.deadline - 1);
   state = act(state, 1, "Submit rebuttal", { text: "This is my response." }, state.deadline - 1);
   assert.equal(state.phase, "prediction");
+  const progress = ["Ari · Argument: passed or timed out · Rebuttal: passed or timed out",
+    "Bo · Argument: submitted · Rebuttal: submitted"];
+  assert.deepEqual(look(JSON.parse(JSON.stringify(state))).cards.find(({ title }) => title === "Speech progress").items, progress);
   const featured = roundLens(state);
   state = act(state, 0, "Lock choices", { emphasis: featured, guess: featured }, state.deadline - 1);
   state = act(state, 1, "Continue", {}, state.deadline);

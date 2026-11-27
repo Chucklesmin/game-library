@@ -48,10 +48,13 @@
 .choice input { flex: 0 0 auto; margin: 0; accent-color: var(--gold); }
 .secondary { background: #273653; }
 .results, .scores { width: 100%; display: grid; gap: 10px; list-style: none; padding: 0; margin: 0; }
-.results li > div:first-child, .scores li { display: flex; justify-content: space-between; gap: 12px; }
-.results li > div:first-child > :last-child, .scores li > strong { flex: 0 0 auto; }
+.resultLabel, .scores li { display: flex; justify-content: space-between; gap: 12px; }
+.resultLabel > :last-child, .scores li > strong { flex: 0 0 auto; }
 .results li strong, .scores small { display: inline-block; margin-left: 9px; font-size: .8em; color: var(--gold); }
 .track { background: #314360; height: 7px; border-radius: 5px; margin-top: 5px; }
 .track span { display: block; background: var(--blue); height: 100%; border-radius: inherit; }
 .scores li { background: #182640; border-radius: 8px; padding: 9px 12px; overflow-wrap: anywhere; }
 .message { margin: 0; color: var(--gold); }
+.resultLabel { align-items:baseline; flex-wrap:wrap; column-gap:12px; row-gap:4px; }
+.resultLabel > :last-child { font-variant-numeric:tabular-nums; }
+.results li[data-leading=true] .track span { background:var(--gold); }

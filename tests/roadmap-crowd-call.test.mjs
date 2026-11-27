@@ -89,7 +89,15 @@ test("stable tied leaders, abstentions, and a zero-ballot round score correctly"
   assert.match(reveal.detail, /tied for the lead/);
   assert.equal(reveal.cards[0].items.filter((item) => item.includes("Leading answer")).length, 2);
   assert.deepEqual(reveal.standings.map(({ score }) => score), [3, 3, 2]);
-  assert.deepEqual(reveal.privateCards.at(-1), { title: "Your round score", body: "+2" });
+  assert.deepEqual(reveal.privateCards.at(-1), {
+    title: "Your round score", body: "+2", items: ["Prediction · +2", "No vote · +0"],
+  });
+  const hostReveal = game.view(JSON.parse(JSON.stringify(state)), context());
+  assert.deepEqual(hostReveal.privateCards.at(-1), {
+    title: "Your round score", body: "+3", items: ["Prediction · +2", "Vote · +1"],
+  });
+  assert.deepEqual(hostReveal.cards, reveal.cards);
+  assert.ok(reveal.privateCards.every(({ title }) => title !== "Your vote"));
   state = move(state, "Next prompt");
   state = move(state, "Lock prediction", 0, "0");
   state = move(state, "Open voting");
@@ -98,6 +106,9 @@ test("stable tied leaders, abstentions, and a zero-ballot round score correctly"
   assert.match(empty.detail, /nobody earned points/i);
   assert.equal(empty.cards[0].items.every((item) => item.endsWith("0 votes")), true);
   assert.deepEqual(empty.standings.map(({ score }) => score), [3, 3, 2]);
+  assert.deepEqual(empty.privateCards.at(-1), {
+    title: "Your round score", body: "+0", items: ["No prediction · +0", "No vote · +0"],
+  });
 });
 
 test("rejects non-host, outsider, invalid, stale and duplicate moves", () => {

@@ -66,6 +66,7 @@ type State = {
   deadline: number | null;
   strokes: Stroke[];
   strokePoints: number;
+  strokeRevision?: number;
   lastStrokeAt: number | null;
   lastGuesses: Record<string, number>;
   result: Result | null;
@@ -75,6 +76,8 @@ type State = {
 const artistId = (state: State) => state.roster[(state.turn - 1) % state.roster.length];
 const currentClue = (state: State) => clues[(state.promptStart + state.turn - 1) % clues.length];
 const moveId = (kind: string, state: State) => `${kind}-${state.turn}`;
+const strokeRevision = (state: State) => state.strokeRevision ?? state.strokes.length;
+const undoId = (state: State) => `${moveId("undo", state)}-${strokeRevision(state)}`;
 const playerName = (context: GameContext, id: string) => context.players.find((player) => player.id === id)?.name ?? "Player";
 
 function requireMember(state: State, context: GameContext) {
@@ -90,6 +93,7 @@ function beginTurn(state: State, turn: number, totalTurns = state.totalTurns): S
     deadline: null,
     strokes: [],
     strokePoints: 0,
+    strokeRevision: 0,
     lastStrokeAt: null,
     lastGuesses: {},
     result: null,
@@ -192,7 +196,19 @@ export const game: GameDefinition<State> = {
       if (state.strokes.length >= MAX_STROKES || strokePoints > MAX_DRAWING_POINTS) {
         throw new Error("The sketch is full. Give the room a chance to guess.");
       }
-      return { ...state, strokes: [...state.strokes, stroke], strokePoints, lastStrokeAt: now };
+      return {
+        ...state, strokes: [...state.strokes, stroke], strokePoints,
+        strokeRevision: strokeRevision(state) + 1, lastStrokeAt: now,
+      };
+    }
+    if (action.id === undoId(state)) {
+      if (actorId !== artistId(state)) throw new Error("Only the active artist can undo.");
+      const lastStroke = state.strokes.at(-1);
+      if (!lastStroke) throw new Error("There is no stroke to undo.");
+      return {
+        ...state, strokes: state.strokes.slice(0, -1), strokePoints: state.strokePoints - lastStroke.points.length,
+        strokeRevision: strokeRevision(state) + 1,
+      };
     }
     if (action.id === moveId("guess", state)) {
       if (actorId === artistId(state)) throw new Error("The artist cannot guess their own scene.");
@@ -250,7 +266,7 @@ export const game: GameDefinition<State> = {
       const canDraw = isArtist && !expired && !full;
       const controls: GameControl[] = expired
         ? [{ id: moveId("expire", state), label: "Reveal the answer" }]
-        : isArtist ? [] : [{
+        : isArtist ? (state.strokes.length ? [{ id: undoId(state), label: "Undo last stroke" }] : []) : [{
           id: moveId("guess", state), label: "Guess",
           fields: [{ name: "guess", label: "Your guess", type: "text", maxLength: MAX_GUESS_LENGTH }],
         }];
@@ -258,7 +274,7 @@ export const game: GameDefinition<State> = {
         ? "Draw the scene with shapes. The group can see each stroke when you finish it."
         : "Name the subject and the action or detail you see.";
       if (expired) detail = "Time ran out. Reveal the answer to finish the turn.";
-      else if (isArtist && full) detail = "The sketch is full. The room can still guess.";
+      else if (isArtist && full) detail = "The sketch is full. Undo a stroke to make room, or let the room guess.";
       else if (!isArtist && Object.hasOwn(state.lastGuesses, actorId)) detail = "That guess didn’t match. Try again.";
       return {
         phase: state.phase, round, standings, controls, detail, deadline: state.deadline,

@@ -101,8 +101,8 @@ function actionId(state: State, verb: string) {
   return [verb, state.id, state.round, state.turn].join(".");
 }
 
-function leadPlayer(state: State) {
-  return state.playerIds[(state.round + state.turn) % state.playerIds.length];
+function leadPlayer(state: State, turn = state.turn) {
+  return state.playerIds[(state.round + turn) % state.playerIds.length];
 }
 
 function control(state: State, verb: string, label: string, fields?: GameControl["fields"]): GameControl {
@@ -230,8 +230,18 @@ function viewFor(state: State, context: GameContext): GameView {
     ? [{ title: "You are the imposter", body: "Listen for the word and offer a clue that fits." }]
     : [{ title: "You are an insider", body: word }];
   const cards: DisplayCard[] = [{ title: "Category", body: category }];
-  const clues = state.playerIds.map((_, index) => state.playerIds[(state.round + index) % state.playerIds.length])
-    .filter((id) => Object.hasOwn(state.clues, id))
+  const speakers = state.playerIds.map((_, index) => leadPlayer(state, index));
+  if (state.phase === "clues") {
+    cards.push({
+      title: "Clue turn order",
+      items: speakers.map((id, index) => {
+        const status = Object.hasOwn(state.clues, id) ? (state.clues[id] === null ? "Passed" : "Clue shared")
+          : index === state.turn ? "Up now" : "Waiting";
+        return `${playerName(context, id)} · ${status}`;
+      }),
+    });
+  }
+  const clues = speakers.filter((id) => Object.hasOwn(state.clues, id))
     .map((id) => `${playerName(context, id)} · ${state.clues[id] ?? "Passed"}`);
   if (clues.length) cards.push({ title: "Clues shared", items: clues });
   const current = { ...common, cards, privateCards, deadline: state.deadline };

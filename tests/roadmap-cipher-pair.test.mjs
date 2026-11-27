@@ -60,6 +60,7 @@ test("private key halves remain complementary and reconnect-safe without exposin
   for (const clue of host.privateCards[0].items) assert.ok(!JSON.stringify(partner).includes(clue));
   const answer = decode(state);
   assert.match(answer, /^[A-Z]+ [A-Z]+$/);
+  assert.equal(host.cards[0].body, `Word lengths: ${answer.split(" ").map((word) => word.length).join(", ")} letters.`);
   assert.ok(!JSON.stringify(host).toUpperCase().includes(answer));
   assert.ok(!JSON.stringify(partner).toUpperCase().includes(answer));
   assert.throws(() => game.view(state, context("intruder")), /players in the room/);

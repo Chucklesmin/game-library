@@ -31,7 +31,7 @@ test("Secret Thread opens only for 3–8 and each player sees exactly their own 
   }
 });
 
-test("Secret Thread reload restores the caller's clues and current shared strike count", () => {
+test("Secret Thread reload restores private clues, shared strikes and prior team guesses", () => {
   const host = context();
   const guest = context(1);
   const state = game.create(host);
@@ -42,7 +42,15 @@ test("Secret Thread reload restores the caller's clues and current shared strike
   assert.deepEqual(view.privateCards, game.view(state, guest).privateCards);
   assert.match(view.cards[0].body, /2 of 3/);
   assert.match(game.view(state, host).cards[0].body, /3 of 3/);
-  assert.ok(!JSON.stringify(view).includes("bananas"));
+  const guesses = { title: "Previous guesses", items: ["bananas"] };
+  assert.deepEqual(view.cards.find(({ title }) => title === guesses.title), guesses);
+  assert.deepEqual(game.view(after, host).cards.find(({ title }) => title === guesses.title), guesses);
+  assert.ok(!view.privateCards.some(({ items }) => items?.includes("bananas")));
+  assert.ok(!view.cards.some(({ title }) => title === answer(state)));
+  const revealed = move(after, guest, "guess", { answer: answer(state) });
+  assert.deepEqual(game.view(revealed, guest).cards.find(({ title }) => title === guesses.title), guesses);
+  const next = move(revealed, host, "next");
+  assert.ok(!game.view(next, guest).cards.some(({ title }) => title === guesses.title));
 });
 
 test("Secret Thread rejects outsider, stale, unknown, repeated and invalid actions without consuming strikes", () => {

@@ -5,6 +5,9 @@ import { game, makeMap } from "../src/lib/roadmap/games/switchboard.ts";
 const players = [{ id: "first", name: "First" }, { id: "second", name: "Second" }];
 const context = (actorId = "first") => ({ players, actorId, hostId: "first", now: 0 });
 const vectors = { North: [-1, 0], East: [0, 1], South: [1, 0], West: [0, -1] };
+const terminal = ([row, column]) => `${"ABCD"[row]}${column + 1}`;
+const checkpoints = (state, actor) =>
+  game.view(state, context(actor)).cards.find(({ title }) => title === "Connected checkpoints");
 
 function countUnblockedRoutes(map) {
   const destination = map.route.at(-1).join();
@@ -74,6 +77,9 @@ test("exact duo and role-specific views survive reload without exposing the seed
   assert.equal(navigator.controls.length, 0);
   assert.equal(operator.controls.length, 2);
   assert.ok(!JSON.stringify(operator).includes("Step 1"));
+  const start = makeMap(state.seed, 0).route[0];
+  assert.deepEqual(checkpoints(state, "second").items, [`Start · ${terminal(start)}`]);
+  assert.deepEqual(checkpoints(state, "first"), checkpoints(state, "second"));
   assert.ok(!JSON.stringify(navigator).includes("Reset at"));
   assert.ok(!JSON.stringify(operator).includes(state.seed));
   assert.deepEqual(game.view(JSON.parse(JSON.stringify(state)), context("second")), operator);
@@ -96,12 +102,17 @@ test("off-route warning holds position, a hazard resets, and stale moves fail", 
   for (let step = 1; step < route.length - 1; step += 1) {
     const safe = availableOptions(state, "second", route[step - 1]).find(({ cell }) => cell.join() === route[step].join());
     state = game.act(state, context("second"), { id: safe.id, values: {} });
+    const recovered = JSON.parse(JSON.stringify(state));
+    assert.deepEqual(checkpoints(recovered, "second").items, route.slice(0, step + 1).map((cell, index) =>
+      `${index === 0 ? "Start" : `Checkpoint ${index}`} · ${terminal(cell)}`));
+    assert.equal(checkpoints(recovered, "second").body, `${step} of 6 connected.`);
     const hazard = availableOptions(state, "second", route[step]).find(({ cell }) => hazards.includes(cell.join()));
     if (hazard) {
       const reset = game.act(state, context("second"), { id: hazard.id, values: {} });
       assert.equal(reset.signal, "reset");
       assert.equal(reset.position, 0);
       assert.equal(reset.remaining, state.remaining - 1);
+      assert.deepEqual(checkpoints(reset, "second").items, [`Start · ${terminal(route[0])}`]);
       return;
     }
   }

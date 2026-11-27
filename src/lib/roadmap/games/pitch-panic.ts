@@ -248,6 +248,12 @@ export const game: GameDefinition<State> = {
   view(state, context) {
     const team = teamOf(state, context.actorId);
     const own = pickPitch(state, team.id);
+    const ballot = Object.hasOwn(state.ballots, context.actorId) ? state.ballots[context.actorId] : undefined;
+    const teamName = (id: TeamId) => state.teams.find((entry) => entry.id === id)!.name;
+    const ballotReceipt: DisplayCard[] | undefined = ballot ? [{
+      title: "Your locked ballot",
+      items: badges.map(({ id, label }) => `${label} · ${ballot[id] === PASS ? "Passed" : teamName(ballot[id])}`),
+    }] : undefined;
     const standings = state.teams.map(({ id, name }) => ({ label: name, score: state.scores[id] ?? 0 }))
       .sort((left, right) => right.score - left.score || left.label.localeCompare(right.label));
     const base: GameView = {
@@ -291,17 +297,18 @@ export const game: GameDefinition<State> = {
       return {
         ...base,
         heading: "Award your badges",
-        detail: Object.hasOwn(state.ballots, context.actorId) ? "Your badge ballot is locked."
+        detail: ballot ? "Your badge ballot is locked."
           : rivals(state, team.id).length ? "Only the badge totals will be revealed." : "You have no rival pitches to rate this round.",
+        privateCards: ballotReceipt,
         cards: state.teams.filter(({ id }) => pickPitch(state, id).presented).map((entry) => pitchCard(state, entry)),
       };
     }
     if (state.phase === "reveal") {
-      const teamName = (id: TeamId) => state.teams.find((entry) => entry.id === id)!.name;
       return {
         ...base,
         heading: "Badge results",
         detail: "Each badge counts the share of eligible opposing players. Tied leaders share the award.",
+        privateCards: ballotReceipt,
         cards: badges.map(({ id, label }) => {
           const result = state.results[id]!;
           return {
@@ -314,6 +321,6 @@ export const game: GameDefinition<State> = {
     }
     const winners = standings.filter(({ score }) => score === standings[0].score).map(({ label }) => label);
     return { ...base, heading: "Pitch Panic complete", detail: winners.join(" and ") +
-      (winners.length > 1 ? " share first place." : " wins."), finished: true };
+      (winners.length > 1 ? " share first place." : " wins."), privateCards: ballotReceipt, finished: true };
   },
 };

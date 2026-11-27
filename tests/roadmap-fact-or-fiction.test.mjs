@@ -52,6 +52,13 @@ test("five-round match covers all confidence outcomes, ties, and reader rotation
     const shown = game.view(state, context());
     assert.equal(shown.phase, round < 4 ? "reveal" : "complete");
     assert.ok(shown.cards.some((card) => card.link?.href === fact.source.href));
+    assert.deepEqual(shown.privateCards, [{
+      title: "Your round score", body: "+3 points. Correct verdict with Bold confidence.",
+    }]);
+    assert.equal(game.view(state, context("player-b")).privateCards[0].body,
+      "+1 point. Correct verdict with Steady confidence.");
+    assert.equal(game.view(state, context("player-d")).privateCards[0].body,
+      "0 points. Incorrect verdict with Steady confidence.");
     assert.deepEqual(shown.standings.map(({ score }) => score), [3, 1, 1, 0, -2].map((score) => score * (round + 1)));
     if (round < 4) state = move(state, context("host", 5_000 + 15_000 * round), "Next statement");
   }
@@ -81,6 +88,7 @@ test("only the author sees a locked ballot before deadline or a completed vote",
     assert.equal(serialized.includes(fact.explanation), false);
     assert.equal(serialized.includes(fact.source.href), false);
     assert.equal(serialized.includes("Your locked verdict"), player.id === "host");
+    assert.equal(serialized.includes("Your round score"), false);
     assert.equal(serialized.includes("playerIds"), false);
     assert.deepEqual(shown.standings.map(({ score }) => score), [0, 0, 0, 0, 0]);
   }
@@ -96,7 +104,11 @@ test("deadline reveals partial or empty ballots once and awards zero for abstent
   assert.throws(() => game.act(locked, context("player-b", initial.deadline - 1), { id: command.id, values: {} }), /timer/);
   assert.throws(() => game.act(locked, late, { id: control(initial, context(), "Lock verdict").id, values: answer(locked, true) }), /closed/);
   const revealed = move(locked, late, "Reveal the answer");
-  assert.deepEqual(game.view(revealed, late).standings.map(({ score }) => score), [0, 0, 0, 0, -2]);
+  const restored = JSON.parse(JSON.stringify(revealed));
+  assert.deepEqual(game.view(restored, late).standings.map(({ score }) => score), [0, 0, 0, 0, -2]);
+  assert.equal(game.view(restored, late).privateCards[0].body, "0 points. You left this statement unanswered.");
+  assert.equal(game.view(restored, context()).privateCards[0].body,
+    "-2 points. Incorrect verdict with Bold confidence.");
   assert.throws(() => game.act(revealed, late, { id: command.id, values: {} }), /unavailable/);
   const next = move(revealed, context("host", initial.deadline), "Next statement");
   const skipped = move(next, context("player-c", next.deadline), "Reveal the answer");

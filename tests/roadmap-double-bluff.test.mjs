@@ -50,7 +50,16 @@ test("Double Bluff accepts only current-turn held higher cards and does not expo
   assert.match(view.detail, /no higher card/);
   assert.equal(view.cards.at(-1).items.length, 2);
   assert.match(view.cards.at(-1).items[1], /^Robin · At least 8 /);
+  assert.equal(view.cards.some(({ title }) => title === "Claim history"), false);
   assert.equal(view.privateCards[1].items.some((line) => /^At least (2|4|6|8) /.test(line)), false);
+
+  const reveal = next(countered, 0, choose(countered, 0, "challenge").id);
+  const recap = game.view(JSON.parse(JSON.stringify(reveal)), context(1));
+  const history = recap.cards.find(({ title }) => title === "Claim history");
+  assert.match(history.items[0], /^1\. June opened with: At least 5 /);
+  assert.match(history.items[1], /^2\. Robin countered with: At least 8 /);
+  assert.equal(history.items[2], "3. June challenged");
+  assert.equal(recap.privateCards, undefined);
   assert.throws(() => next(countered, 0, opening.id, { rank: "7" }), /unavailable/);
   assert.throws(() => game.act(countered, { ...context(), actorId: "outsider" }, { id: "challenge-1-2", values: {} }), /Only the two players/);
 });

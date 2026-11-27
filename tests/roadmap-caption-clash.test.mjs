@@ -26,9 +26,9 @@ function begin() {
 
 function ballotFor(state, actorId, answer) {
   const view = game.view(state, context(actorId));
-  const label = view.cards.find((card) => card.body === answer)?.title;
+  const card = view.cards.find((entry) => entry.body === answer);
   const option = view.controls.find(({ id }) => id === "vote")?.fields[0].options
-    .find(({ label: candidate }) => label === candidate);
+    .find(({ label }) => card && label === `${card.title} · ${card.body}`);
   assert.ok(option, `expected a ballot option for ${answer}`);
   return option.value;
 }
@@ -73,6 +73,10 @@ test("submission and ballot views are private and immutable", () => {
   assert.equal(camView.cards.length, 3);
   assert.deepEqual(camView.cards.map(({ title }) => title), ["Answer A", "Answer B", "Answer C"]);
   assert.ok(camView.cards.every((card) => !card.items));
+  const choices = camView.controls.find(({ id }) => id === "vote").fields[0].options;
+  assert.deepEqual(choices.map(({ label }) => label), camView.cards.map(({ title, body }) => `${title} · ${body}`));
+  const hostChoices = game.view(state, context()).controls.find(({ id }) => id === "vote").fields[0].options;
+  assert.ok(hostChoices.every(({ label }) => !label.includes("Secret host answer")));
   for (const forbidden of [state.seed, host, sam.id, jay.id]) {
     assert.ok(!JSON.stringify(camView).includes(forbidden));
   }
@@ -81,7 +85,9 @@ test("submission and ballot views are private and immutable", () => {
   assert.throws(() => act(state, "vote", { ballot: "does-not-exist" }), /another player/);
   const chosen = ballotFor(state, host, "Sam answer");
   state = act(state, "vote", { ballot: chosen });
-  assert.equal(game.view(state, context()).privateCards[1].title, "Your locked vote");
+  const receipt = game.view(state, context()).privateCards[1];
+  assert.equal(receipt.title, "Your locked vote");
+  assert.match(receipt.body, /^Answer [A-C] · Sam answer$/);
   assert.ok(!JSON.stringify(game.view(state, context(jay.id))).includes("Your locked vote"));
   assert.throws(() => act(state, "abstain"), /already locked/);
   const reloaded = JSON.parse(JSON.stringify(state));

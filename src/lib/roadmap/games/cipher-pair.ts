@@ -216,6 +216,7 @@ function view(state: State, context: GameContext): GameView {
       `${firstReader.name} reads the first number. Talk through the keys together. ${remaining} ${remaining === 1 ? "strike" : "strikes"} left.`,
     cards: [{
       title: "Code on both screens",
+      body: `Word lengths: ${puzzle.cipher.map((word) => word.split(" · ").length).join(", ")} letters.`,
       items: puzzle.cipher.map((word, wordIndex) => `Word ${wordIndex + 1}: ${word}`),
     }],
     privateCards: [{

@@ -131,6 +131,13 @@ function act(state: State, context: GameContext, action: GameAction): State {
 function view(state: State, context: GameContext): GameView {
   checkCrew(state, context);
   const round = `Route ${state.leg + 1} of 2`;
+  const map = makeMap(state.seed, state.leg);
+  const checkpoints = {
+    title: "Connected checkpoints",
+    body: `${state.position} of ${map.route.length - 1} connected.`,
+    items: map.route.slice(0, state.position + 1).map((cell, index) =>
+      `${index === 0 ? "Start" : `Checkpoint ${index}`} · ${cellName(cell)}`),
+  };
   if (state.phase !== "routing") {
     const solved = state.results.filter((result) => result.solved).length;
     const score = state.results.reduce((sum, result) => sum + (result.solved ? result.remaining : 0), 0);
@@ -141,16 +148,15 @@ function view(state: State, context: GameContext): GameView {
       detail: finished
         ? (solved === 2 ? "Your crew connected both circuits. Your score is the sum of the moves you saved." : "Both routes must reach the destination for a crew win.")
         : (state.leg === 0 ? "Swap roles for the second circuit." : "Both circuits have ended."),
-      cards: state.results.map((result, index) => ({
+      cards: [...state.results.map((result, index) => ({
         title: `Route ${index + 1}`,
         body: result.solved ? `Connected with ${result.remaining} moves left.` : "Move budget exhausted before connecting.",
-      })),
+      })), ...(finished ? [] : [checkpoints])],
       standings: [{ label: "Routes connected", score: solved }, { label: "Combined moves saved", score }],
       controls: finished ? [] : [{ id: `continue-${state.leg}`, label: state.leg === 0 ? "Swap roles and start route 2" : "See crew results" }],
     };
   }
 
-  const map = makeMap(state.seed, state.leg);
   const position = map.route[state.position];
   const navigator = context.actorId === state.crew[state.leg];
   return {
@@ -161,7 +167,7 @@ function view(state: State, context: GameContext): GameView {
       title: "Signal",
       body: signals[state.signal],
       items: [`Current terminal ${cellName(position)}`, `Destination ${cellName(map.route[map.route.length - 1])}`, `${state.remaining} moves left`],
-    }],
+    }, checkpoints],
     privateCards: navigator ? [{
       title: "Your safe route",
       body: "Rows A–D run north to south. Columns 1–4 run west to east.",

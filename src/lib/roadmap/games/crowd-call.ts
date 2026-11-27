@@ -62,7 +62,7 @@ function choose(state: State, choices: ChoicesByPlayer, actorId: string, value: 
 function roundPoints(state: State, playerId: string, leaders: readonly number[]) {
   const predictionPoints = leaders.includes(state.predictions[playerId]) ? 2 : 0;
   const votePoints = leaders.includes(state.ballots[playerId]) ? 1 : 0;
-  return predictionPoints + votePoints;
+  return { predictionPoints, votePoints, total: predictionPoints + votePoints };
 }
 
 function closeVoting(state: State, context: GameContext): State {
@@ -72,7 +72,7 @@ function closeVoting(state: State, context: GameContext): State {
   const leaders = counts.flatMap((count, index) => count > 0 && count === highest ? [index] : []);
   const scores = Object.fromEntries(context.players.map(({ id }) => [
     id,
-    state.scores[id] + roundPoints(state, id, leaders),
+    state.scores[id] + roundPoints(state, id, leaders).total,
   ]));
   return { ...state, scores, result: { counts, leaders }, phase: "reveal" };
 }
@@ -144,8 +144,15 @@ function viewFor(state: State, context: GameContext): GameView {
   }
 
   const result = state.result!;
-  const personalPoints = roundPoints(state, context.actorId, result.leaders);
-  privateCards.push({ title: "Your round score", body: `+${personalPoints}` });
+  const { predictionPoints, votePoints, total } = roundPoints(state, context.actorId, result.leaders);
+  privateCards.push({
+    title: "Your round score",
+    body: `+${total}`,
+    items: [
+      `${prediction === undefined ? "No prediction" : "Prediction"} · +${predictionPoints}`,
+      `${ballot === undefined ? "No vote" : "Vote"} · +${votePoints}`,
+    ],
+  });
   const detail = result.leaders.length
     ? `${result.leaders.map((index) => prompt.choices[index]).join(" / ")} ${result.leaders.length === 1 ? "led the vote" : "tied for the lead"}.`
     : "The room cast no ballots. Nobody earned points.";

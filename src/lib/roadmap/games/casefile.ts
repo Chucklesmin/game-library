@@ -287,6 +287,15 @@ function view(state: State, context: GameContext): GameView {
     { label: "Team score", score: state.totalScore },
   ];
 
+  const hypothesisCards = state.guesses.length ? [{
+    title: "Submitted hypotheses",
+    items: state.guesses.map((guess, index) => {
+      const choices = components.map((component) =>
+        `${fieldLabels[component]}: ${caseFile.choices[component][guess[component]]}`).join(" · ");
+      return `Attempt ${index + 1} · ${choices}`;
+    }),
+  }] : [];
+
   if (state.outcome) {
     const finished = endsSession(state);
     const result = {
@@ -303,6 +312,7 @@ function view(state: State, context: GameContext): GameView {
           title: caseFile.title, body: caseFile.explanation,
           items: components.map((component) => `${fieldLabels[component]} · ${caseFile.choices[component][caseFile.solution[component]]}`),
         },
+        ...hypothesisCards,
       ],
       controls: finished ? [] : [{ id: actionId(state, "next"), label: "Open next case" }],
     };
@@ -317,7 +327,7 @@ function view(state: State, context: GameContext): GameView {
   return {
     phase: "investigate", heading: caseFile.title, round, deadline: state.deadline,
     detail: expired ? "Time is up. Reveal the solution to close the case." : progress,
-    cards: [{ title: "Case briefing", body: caseFile.brief }],
+    cards: [{ title: "Case briefing", body: caseFile.brief }, ...hypothesisCards],
     privateCards: [
       { title: "Witness note", body: evidence.witness },
       { title: "Timeline note", body: evidence.timeline },

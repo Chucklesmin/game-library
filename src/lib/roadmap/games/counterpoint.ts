@@ -148,6 +148,23 @@ function speechCards(state: State, context: GameContext): DisplayCard[] {
   return cards;
 }
 
+function speechProgress(state: State, context: GameContext): DisplayCard {
+  const status = (speech: "argument" | "rebuttal", text: string | null, seat: Seat) => {
+    if (text !== null) return "submitted";
+    const duringSpeech = state.phase === speech;
+    const alreadyHadTurn = duringSpeech && seat === state.opener && state.speaker !== seat;
+    const pastSpeech = state.phase === "prediction" || state.phase === "reveal" ||
+      state.phase === "complete" || (speech === "argument" && state.phase === "rebuttal");
+    if (alreadyHadTurn || pastSpeech) return "passed or timed out";
+    return duringSpeech && state.speaker === seat ? "due now" : "still due";
+  };
+  return {
+    title: "Speech progress",
+    items: [state.opener, other(state.opener)].map((seat) =>
+      `${playerName(state, context, seat)} · Argument: ${status("argument", state.arguments[seat], seat)} · Rebuttal: ${status("rebuttal", state.rebuttals[seat], seat)}`),
+  };
+}
+
 export const game: GameDefinition<State> = {
   slug: "counterpoint",
   title: "Counterpoint",
@@ -219,6 +236,7 @@ export const game: GameDefinition<State> = {
     const cards: DisplayCard[] = [
       { title: "The claim", body: prompt.claim, items: [`Featured lens: ${lenses[prompt.lens]}`] },
       ...speechCards(state, context),
+      ...(state.phase === "prep" ? [] : [speechProgress(state, context)]),
     ];
     const base = {
       phase: state.phase,

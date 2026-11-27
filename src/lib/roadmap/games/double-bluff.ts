@@ -168,7 +168,7 @@ export const game: GameDefinition<State> = {
       round: `Round ${state.round} · First to ${TARGET_SCORE} points`,
       cards: [
         { title: scenario.title, body: scenario.description },
-        ...(prior ? [{
+        ...(prior && !state.reveal ? [{
           title: "Claims on the table",
           items: state.claims.map((claim) => `${name(claim.seat)} · ${describeClaim(scenario, claim.rank)}`),
         }] : []),
@@ -189,6 +189,15 @@ export const game: GameDefinition<State> = {
         heading: finished(state) ? `${winner} wins the duel` : verdict,
         detail: `${name(result.challengedBy)} challenged the last claim. ${verdict}. ${winner} scores one point.`,
         cards: [...(shared.cards ?? []), {
+          title: "Claim history",
+          items: [
+            ...state.claims.map((claim, index) => {
+              const move = index === 0 ? "opened with" : "countered with";
+              return `${index + 1}. ${name(claim.seat)} ${move}: ${describeClaim(scenario, claim.rank)}`;
+            }),
+            `${state.claims.length + 1}. ${name(result.challengedBy)} challenged`,
+          ],
+        }, {
           title: "Parcel inspection",
           body: `${describeClaim(scenario, result.claim.rank)} claimed · ${describeCount(scenario, result.total)} found`,
           items: [

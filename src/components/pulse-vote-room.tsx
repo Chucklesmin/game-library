@@ -12,6 +12,7 @@ import { readableErrorMessage } from "@/lib/error-message.mjs";
 import styles from "./pulse-vote-room.module.css";
 
 const resumeKey = "game-library:pulse-vote-room";
+const voteShare = new Intl.NumberFormat("en", { style: "percent", maximumFractionDigits: 1 });
 
 function RoundSettings({ label, onStart, disabled }: {
   label: string;
@@ -49,18 +50,27 @@ function RoundResult({ view }: { view: PulseVoteView }) {
   if (!view.result || !view.prompt) return null;
   const { counts, winners } = view.result;
   const total = counts.reduce((sum, count) => sum + count, 0);
+  const abstentions = Math.max(0, view.players.length - total);
   const earnedPoint = view.myChoice !== null && winners.includes(view.myChoice);
   return <>
+    <p>{total} of {view.players.length} players voted. {abstentions} {abstentions === 1 ? "abstention" : "abstentions"}.</p>
     <p>{total === 0 ? "No votes this round. No points awarded." : <>
-      {total} of {view.players.length} players voted.{winners.length > 1 && " Tied answers each score."}
-      {earnedPoint ? " You earned 1 point." : view.myChoice !== null ? " You earned 0 points." : " You sat out this round."}
+      {winners.length > 1 && "Tied answers each score. "}
+      {earnedPoint ? "You earned 1 point." : view.myChoice !== null ? "You earned 0 points." : "You sat out this round."}
     </>}</p>
-    <ul className={styles.results} aria-label="Vote distribution">
-      {view.prompt.choices.map((answer, index) => <li key={answer}>
-        <div><span>{answer}{winners.includes(index) && <strong>Top answer</strong>}</span>
-          <span>{counts[index]} {counts[index] === 1 ? "vote" : "votes"}</span></div>
-        <div className={styles.track} aria-hidden="true"><span style={{ width: `${total ? counts[index] / total * 100 : 0}%` }} /></div>
-      </li>)}
+    <ul className={styles.results} aria-label="Vote distribution as a share of votes cast">
+      {view.prompt.choices.map((answer, index) => {
+        const count = counts[index] ?? 0;
+        const share = total > 0 ? count / total : 0;
+        const leading = winners.includes(index);
+        return <li key={answer} data-leading={leading}>
+          <div className={styles.resultLabel}>
+            <span>{answer}{leading && <strong>Top answer</strong>}</span>
+            <span>{count} {count === 1 ? "vote" : "votes"} · {voteShare.format(share)}</span>
+          </div>
+          <div className={styles.track} aria-hidden="true"><span style={{ width: `${share * 100}%` }} /></div>
+        </li>;
+      })}
     </ul>
   </>;
 }

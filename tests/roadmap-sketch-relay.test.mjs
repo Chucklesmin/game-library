@@ -71,6 +71,11 @@ test("validates ink, widths, finite points, payload size, and pace while preserv
   assert.equal(game.view(clone(filled), context("b", 4500)).drawing.strokes.length, 50);
   assert.equal(game.view(filled, context("a", 4500)).drawing.strokeAction, undefined);
   assert.throws(() => save(filled, stroke(), 5100), /sketch is full/);
+  const undo = game.view(filled, context("a", 5100)).controls.find(({ label }) => label === "Undo last stroke");
+  const hasRoom = act(filled, undo.id, {}, "a", 5100);
+  assert.equal(hasRoom.strokes.length, 49);
+  assert.equal(hasRoom.strokePoints, 98);
+  assert.equal(save(hasRoom, stroke(), 5100).strokes.length, 50);
 
   const large = stroke(Array.from({ length: 150 }, () => [0.2345, 0.789]));
   let fullOfPoints = active;
@@ -79,6 +84,40 @@ test("validates ink, widths, finite points, payload size, and pace while preserv
   }
   assert.equal(fullOfPoints.strokePoints, 3000);
   assert.throws(() => save(fullOfPoints, stroke(), 5100), /sketch is full/);
+});
+
+test("the active artist can undo only the latest saved stroke and expired or replayed undo is rejected", () => {
+  const active = draw();
+  const undoControl = (state, actor = "a", now = 1500) =>
+    game.view(state, context(actor, now)).controls.find(({ label }) => label === "Undo last stroke");
+  assert.equal(undoControl(active), undefined);
+
+  const firstStroke = stroke([[0, 0]]);
+  const lastStroke = stroke([[0.2, 0.3], [0.5, 0.5], [1, 1]]);
+  const saved = clone(save(save(active, firstStroke), lastStroke, 1160));
+  delete saved.strokeRevision; // A room saved before undo was introduced.
+  const control = undoControl(saved);
+  assert.ok(control);
+  assert.equal(undoControl(saved, "b"), undefined);
+  assert.throws(() => act(saved, control.id, {}, "b", 1500), /Only the active artist/);
+  assert.equal(undoControl(saved, "a", saved.deadline), undefined);
+  assert.throws(() => act(saved, control.id, {}, "a", saved.deadline), /Time has run out/);
+
+  const undone = act(saved, control.id, {}, "a", 1500);
+  assert.deepEqual(saved.strokes, [firstStroke, lastStroke]);
+  assert.deepEqual(game.view(clone(undone), context("b", 1500)).drawing.strokes, [firstStroke]);
+  assert.equal(undone.strokePoints, 1);
+  assert.equal(undone.lastStrokeAt, saved.lastStrokeAt);
+  assert.equal(game.view(undone, context("a", 1500)).drawing.strokeAction, "stroke-1");
+  assert.throws(() => act(undone, control.id, {}, "a", 1500), /not available/);
+
+  const redrawn = save(undone, lastStroke, 1560);
+  assert.throws(() => act(redrawn, control.id, {}, "a", 1600), /not available/);
+  const backToOne = act(redrawn, undoControl(redrawn).id, {}, "a", 1600);
+  const empty = act(backToOne, undoControl(backToOne).id, {}, "a", 1700);
+  assert.equal(empty.strokePoints, 0);
+  assert.equal(undoControl(empty), undefined);
+  assert.deepEqual(game.view(clone(empty), context("b", 1700)).drawing.strokes, []);
 });
 
 test("first matching description scores once, guesses have private feedback, and expiration takes no points", () => {

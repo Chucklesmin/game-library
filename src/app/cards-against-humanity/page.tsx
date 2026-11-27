@@ -6,6 +6,7 @@ import { loadCahDeck } from "@/lib/cah-deck.mjs";
 import { dealHands, playHandCard } from "@/lib/cah-local-hands.mjs";
 import { canAddPlayer, canStartGame, createSubmission, drawPrompt, getVoteChoices, recordVote, scoreRound, validatePlayerName } from "@/lib/cards-against-humanity-rules.mjs";
 import { CardsAgainstHumanityOnline } from "@/components/cards-against-humanity-online";
+import { CahResponsePicker } from "@/components/cah-response-picker";
 import { supabase } from "@/lib/supabase";
 
 type Player = { id: string; name: string; score: number };
@@ -208,7 +209,7 @@ export default function CardsAgainstHumanityPage() {
       </div> : <div className="caption-turn">
         <p className="eyebrow">YOUR CARD · {currentPlayer?.name}</p>
         <div className="caption-prompt">{prompt.text}</div>
-        {responseMode === "cards" && hands && currentPlayer ? <div className="cah-hand" aria-label={`Private hand for ${currentPlayer.name}`}>{hands.hands[currentPlayer.id].map((card: {id:string;text:string}) => <button className="caption-answer" key={card.id} onClick={() => submitResponse(undefined, card.id)}>{card.text}</button>)}</div> : <form className="caption-response-form" onSubmit={submitResponse}>
+        {responseMode === "cards" && hands && currentPlayer ? <CahResponsePicker key={`${round}:${currentPlayer.id}`} cards={hands.hands[currentPlayer.id]} prompt={prompt.text} label={`Private hand for ${currentPlayer.name}`} onConfirm={(cardId) => submitResponse(undefined, cardId)} /> : <form className="caption-response-form" onSubmit={submitResponse}>
           <label htmlFor="caption-response">Write a short response</label>
           <textarea id="caption-response" autoFocus value={response} onChange={(event) => setResponse(event.target.value.slice(0, 180))} placeholder="Make it count…" maxLength={180} required />
           <span className="caption-counter">{response.length}/180</span>

@@ -23,6 +23,8 @@ const prompts = [
 type Prediction = "match" | "miss" | "skip";
 type Phase = "select" | "reveal" | "complete";
 type Outcome = "match" | "miss" | "timeout";
+type RoundResult = { round: number; outcome: Outcome };
+const outcomeLabels: Record<Outcome, string> = { match: "Matched", miss: "Different picks", timeout: "Timed out" };
 
 type State = {
   players: [string, string];
@@ -36,6 +38,7 @@ type State = {
   bestStreak: number;
   matches: number;
   correctPredictions: number;
+  history?: RoundResult[];
 };
 
 function currentPrompt(state: State) {
@@ -48,6 +51,11 @@ function outcome(state: State): Outcome {
     return "timeout";
   }
   return state.choices[first] === state.choices[second] ? "match" : "miss";
+}
+
+function resultHistory(state: State, result: Outcome): RoundResult[] {
+  const history = state.history ?? [];
+  return history.at(-1)?.round === state.round ? history : [...history, { round: state.round, outcome: result }];
 }
 
 function reveal(state: State): State {
@@ -64,6 +72,7 @@ function reveal(state: State): State {
     bestStreak: Math.max(state.bestStreak, streak),
     matches: state.matches + Number(result === "match"),
     correctPredictions: state.correctPredictions + roundPredictions,
+    history: resultHistory(state, result),
   };
 }
 
@@ -102,6 +111,7 @@ export const game: GameDefinition<State> = {
       bestStreak: 0,
       matches: 0,
       correctPredictions: 0,
+      history: [],
     };
   },
   act(state, context, action) {
@@ -115,6 +125,7 @@ export const game: GameDefinition<State> = {
         round: round + 1,
         phase: "select",
         deadline: now + ROUND_DURATION_MS,
+        history: resultHistory(state, outcome(state)),
         choices: {},
         predictions: {},
       };
@@ -221,6 +232,7 @@ export const game: GameDefinition<State> = {
     const resultDetail = result === "match" ? "Your streak grew by one."
       : result === "miss" ? "Different choices reset your streak."
       : "At least one player missed their choice. The streak resets and predictions are void.";
+    const history = resultHistory(state, result);
 
     return {
       ...base,
@@ -240,6 +252,11 @@ export const game: GameDefinition<State> = {
             items,
           };
         }),
+        {
+          title: "Round timeline",
+          body: history[0].round > 1 ? "Earlier round results were not recorded." : undefined,
+          items: history.map(({ round, outcome }) => `Round ${round} · ${outcomeLabels[outcome]}`),
+        },
       ],
       finished: complete,
       controls: complete ? [] : [{ id: `next-${round}`, label: "Next prompt" }],

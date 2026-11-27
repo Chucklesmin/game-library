@@ -69,7 +69,12 @@ async function validatePulseVote(page) {
     await contexts[2].setOffline(true);
 
     await button(host, "Close voting").click();
-    await see(host, /2 of 3 players voted. Tied answers each score./);
+    await see(host, "2 of 3 players voted. 1 abstention.");
+    await see(host, /Tied answers each score/);
+    const distribution = host.getByRole("list", { name: /Vote distribution/ });
+    if (await distribution.getByText("1 vote · 50%", { exact: true }).count() !== 2) {
+      throw new Error("A tied ballot did not show both 50% shares");
+    }
     await see(guest, /You earned 1 point/);
     await button(host, "Next round").click();
     await see(guest, "Round 2 of 3");
@@ -79,12 +84,18 @@ async function validatePulseVote(page) {
     await ballot(guest, 2);
     await ballot(host, 1);
     await button(host, "Close voting").click();
-    await see(guest, /3 of 3 players voted. You earned 1 point./);
+    await see(guest, "3 of 3 players voted. 0 abstentions.");
+    await see(guest, "You earned 1 point.");
+    await see(guest, "2 votes · 66.7%");
     await button(host, "Next round").click();
 
     await see(host, "Round 3 of 3");
     await button(host, "Close voting").click();
     await see(away, "No votes this round. No points awarded.");
+    await see(away, "0 of 3 players voted. 3 abstentions.");
+    if (await away.getByRole("list", { name: /Vote distribution/ }).getByText("0 votes · 0%", { exact: true }).count() !== 4) {
+      throw new Error("An empty ballot did not show zero share for all answers");
+    }
     await button(host, "Show final standings").click();
     for (const target of pages) {
       await see(target, "Final standings");

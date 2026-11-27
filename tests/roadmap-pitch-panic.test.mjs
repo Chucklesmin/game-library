@@ -105,7 +105,15 @@ test("a complete match rotates pitchers and team order, seals ballots, and shows
     const opponentBefore = game.view(state, context("p1"));
     state = action(state, context, "p0", "Lock badge ballot", { ...passVotes, useful: "loop" });
     assert.deepEqual(game.view(state, context("p1")), opponentBefore);
-    assert.match(game.view(state, context()).detail, /locked/);
+    const receipt = {
+      title: "Your locked ballot",
+      items: ["Most Useful · Loop Labs", "Best Disaster · Passed", "Would Buy · Passed"],
+    };
+    const restored = JSON.parse(JSON.stringify(state));
+    const lockedView = game.view(restored, context());
+    assert.match(lockedView.detail, /locked/);
+    assert.deepEqual(lockedView.privateCards, [receipt]);
+    assert.equal(game.view(restored, context("p2")).privateCards, undefined);
     assert.throws(() => game.act(state, context(), { id: ballot, values: passVotes }), /unavailable/);
     for (const actor of ["p1", "p2", "p3", "p4", "p5"]) {
       state = action(state, context, actor, "Lock badge ballot", passVotes);
@@ -113,6 +121,10 @@ test("a complete match rotates pitchers and team order, seals ballots, and shows
     state = action(state, context, "p0", "Reveal badges");
     assert.equal(game.view(state, context()).cards[0].body, "Loop Labs");
     assert.equal(game.view(state, context()).cards[1].body, "No award");
+    assert.deepEqual(game.view(state, context()).privateCards, [receipt]);
+    assert.deepEqual(game.view(state, context("p1")).privateCards[0].items, [
+      "Most Useful · Passed", "Best Disaster · Passed", "Would Buy · Passed",
+    ]);
     assert.equal(roundStart.phase, "planning");
     state = action(state, context, "p0", round === 3 ? "See final standings" : "Deal next constraints");
   }

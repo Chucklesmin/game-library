@@ -102,7 +102,14 @@ test("A valid hypothesis burns one lead per wrong component and prevents stale o
   assert.equal(state.leads, 4);
   assert.deepEqual(state.guesses, []);
   assert.equal(after.leads, 2);
-  assert.match(game.view(after, requester()).detail, /2 incorrect answers.*2 shared leads remain/);
+  const investigation = game.view(after, requester());
+  assert.match(investigation.detail, /2 incorrect answers.*2 shared leads remain/);
+  const history = investigation.cards.find(({ title }) => title === "Submitted hypotheses");
+  const selectedLabels = control.fields.map((field) =>
+    `${field.label}: ${field.options.find(({ value }) => value === bad[field.name]).label}`);
+  assert.deepEqual(history.items, [`Attempt 1 · ${selectedLabels.join(" · ")}`]);
+  assert.deepEqual(game.view(JSON.parse(JSON.stringify(after)), requester("guest")).cards, investigation.cards);
+  assert.equal(game.view(state, requester()).cards.some(({ title }) => title === "Submitted hypotheses"), false);
   assert.throws(() => game.act(after, requester(), { id: control.id, values: answer }), /current case and attempt/);
   assert.throws(() => move(after, bad), /already tried that combination/);
   const solvedWithTwoLeads = move(after, answer, requester("guest", state.deadline - 5_000));
@@ -111,7 +118,9 @@ test("A valid hypothesis burns one lead per wrong component and prevents stale o
   assert.equal(exhausted.leads, 0);
   assert.equal(exhausted.outcome, "spent");
   assert.equal(exhausted.totalScore, 0);
-  assert.match(game.view(exhausted, requester("guest")).detail, /ran out of leads/);
+  const closed = game.view(exhausted, requester("guest"));
+  assert.match(closed.detail, /ran out of leads/);
+  assert.equal(closed.cards.find(({ title }) => title === "Submitted hypotheses").items.length, 2);
 });
 
 test("Deadline changes available controls and closes the case without scoring", () => {
