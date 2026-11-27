@@ -47,16 +47,24 @@ await rejected(guest, "pulse_vote_move", moveArgs("start", null, 2), /Only the h
 await rejected(host, "update_room_state", { ...roomArgs, p_status: "lobby", p_game_state: {} }, /managed by Pulse Vote/);
 
 const changes = [];
+await guest.realtime.setAuth();
 const channel = guest.channel(`pulse-qa:${room.id}`).on("postgres_changes",
   { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${room.id}` },
   (event) => changes.push(event.new));
 try {
   await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error("Pulse Vote realtime subscription timed out.")), 10000);
-    channel.subscribe((status, error) => {
-      if (status === "SUBSCRIBED" || status === "CHANNEL_ERROR" || status === "TIMED_OUT") clearTimeout(timeout);
-      if (status === "SUBSCRIBED") resolve();
-      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") reject(error ?? new Error(status));
+    const timeout = setTimeout(() => reject(new Error("Pulse Vote Postgres Changes registration timed out.")), 15000);
+    // The socket can join before the server has registered its Postgres Changes listener.
+    channel.on("system", {}, (event) => {
+      if (event.extension !== "postgres_changes") return;
+      clearTimeout(timeout);
+      if (event.status === "ok") resolve();
+      else reject(new Error(event.message ?? "Postgres Changes registration failed."));
+    }).subscribe((status, error) => {
+      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        clearTimeout(timeout);
+        reject(error ?? new Error(status));
+      }
     });
   });
 

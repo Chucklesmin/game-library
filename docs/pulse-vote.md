@@ -15,7 +15,7 @@ Crowd Call is the planned game with a separate prediction phase.
 
 ## Data and release
 
-The published Starter Pack uses `game_packs` and `game_content`. Migration `20261127021027_pulse_vote_multiplayer.sql` adds the private state table, a room roster guard, and authenticated RPCs. Room writes serialize under a room row lock. Moves carry the expected round ID, so a retry from an older round or match cannot affect the current one. Realtime publishes shared room phase changes. Each member reads a filtered view and gets only their own choice. The client also refreshes while visible to recover missed notifications and roster changes.
+The published Starter Pack uses `game_packs` and `game_content`. Migration `20261127021027_pulse_vote_multiplayer.sql` adds the private state table, a room roster guard, and authenticated RPCs. Supabase recorded the production application as `20261127023219`. Room writes serialize under a room row lock. Moves carry the expected round ID, so a retry from an older round or match cannot affect the current one. Realtime publishes shared room phase changes. Each member reads a filtered view and gets only their own choice. The client also refreshes while visible to recover missed notifications and roster changes.
 
 Use a non-production Supabase target first. Apply the migration and run the RPC acceptance script using that target’s URL and publishable key as `SIGNAL_SUPABASE_URL` and `SIGNAL_SUPABASE_KEY`:
 
