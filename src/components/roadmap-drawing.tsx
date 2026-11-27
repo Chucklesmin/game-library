@@ -94,7 +94,7 @@ export function RoadmapDrawing({ drawing, send, pending }: {
   }
 
   const editable = Boolean(drawing.strokeAction);
-  return <div>
+  return <div data-game-zone="tools">
     {editable && <div className={styles.drawingTools}>
       <label>Ink<select value={color} onChange={(event) => setColor(event.target.value)}>
         {palette.map(([value, label]) => <option value={value} key={value}>{label}</option>)}

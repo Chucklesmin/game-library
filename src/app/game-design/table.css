@@ -1,0 +1,367 @@
+/* Secret Thread: a corkboard for comparing private fragments and shared guesses. */
+[data-game-design="secret-thread"],
+[data-game-cover="secret-thread"] {
+  --game-backdrop: radial-gradient(ellipse at 15% 0, #27433b, #101f1d 65%);
+  --game-surface: #1b312b;
+  --game-raised: #263e34;
+  --game-field: #13251f;
+  --game-border: #7d927c;
+  --game-ink: #f7f1d9;
+  --game-muted: #ded7bd;
+  --game-accent: #f0cb78;
+  --game-action: #f0cb78;
+  --game-action-ink: #242617;
+  --game-display: "Trebuchet MS", "Segoe UI", sans-serif;
+  --game-radius: .75rem;
+  --game-motif:
+    radial-gradient(circle at 21% 67%, #ffe0a2 0 5%, transparent 6%),
+    radial-gradient(circle at 45% 32%, #ffe0a2 0 5%, transparent 6%),
+    radial-gradient(circle at 76% 55%, #ffe0a2 0 5%, transparent 6%),
+    linear-gradient(126deg, transparent 47%, #cf9e50 48% 53%, transparent 54%) 22% 47% / 33% 49% no-repeat,
+    linear-gradient(26deg, transparent 47%, #cf9e50 48% 53%, transparent 54%) 67% 45% / 44% 36% no-repeat,
+    #263e34;
+}
+
+[data-game-design="secret-thread"] [data-game-zone="board"] {
+  background-image: radial-gradient(#bdc29b32 .75px, transparent .75px);
+  background-size: 11px 11px;
+}
+
+[data-game-design="secret-thread"] [data-game-zone="round"] {
+  padding-block-end: .85rem;
+  border-block-end: 1px dashed var(--game-border);
+}
+
+[data-game-design="secret-thread"] [data-game-zone="private"] [data-game-zone="card"] {
+  background: #eae1bb;
+  color: #1c352b;
+  border: 1px solid #a7945f;
+  border-radius: .35rem;
+  box-shadow: 3px 4px 0 #12251d;
+}
+
+[data-game-design="secret-thread"] [data-game-zone="private"] ul {
+  display: grid;
+  gap: .7rem;
+  padding: 0;
+  list-style: none;
+}
+
+[data-game-design="secret-thread"] [data-game-zone="private"] li {
+  padding: .65rem .7rem .65rem 1.6rem;
+  background:
+    radial-gradient(circle at .77rem .9rem, #855626 0 .16rem, transparent .19rem),
+    repeating-linear-gradient(transparent 0 1.55rem, #7c724b2c 1.55rem 1.6rem);
+  border: 1px solid #b2a274;
+  border-radius: .3rem;
+}
+
+[data-game-design="secret-thread"] [data-game-zone="public"] {
+  grid-template-columns: 1fr;
+}
+
+[data-game-design="secret-thread"][data-game-phase="reveal"] [data-game-zone="public"] [data-game-zone="card"]:first-child {
+  color: #1f3528;
+  background: #f0cb78;
+  border-color: #9b6d35;
+}
+
+/* Pitch Panic: team booth awnings, a presenter stage and badge tables. */
+[data-game-design="pitch-panic"],
+[data-game-cover="pitch-panic"] {
+  --game-backdrop: radial-gradient(ellipse at 15% 0, #ffd4b5, #f3ad91 72%);
+  --game-scheme: light;
+  --game-surface: #fff6ea;
+  --game-raised: #ffdfca;
+  --game-field: #fffbf4;
+  --game-border: #a05241;
+  --game-ink: #412122;
+  --game-muted: #663b34;
+  --game-accent: #872f26;
+  --game-action: #742c37;
+  --game-action-ink: #fff8e9;
+  --game-display: Impact, "Arial Narrow", "Trebuchet MS", sans-serif;
+  --game-radius: .55rem;
+  --game-motif:
+    linear-gradient(#722e3a 0 0) 50% 78% / 48% 5% no-repeat,
+    linear-gradient(#722e3a 0 0) 29% 67% / 4% 35% no-repeat,
+    linear-gradient(#722e3a 0 0) 71% 67% / 4% 35% no-repeat,
+    repeating-linear-gradient(105deg, #fff3d4 0 12%, #8f3150 12% 22%) 50% 33% / 68% 20% no-repeat,
+    #f4b897;
+}
+
+[data-game-design="pitch-panic"] [data-game-zone="board"] {
+  border-block-start: .5rem solid #742c37;
+  background-image: repeating-linear-gradient(115deg, #a64449 0 24px, #ffe2bf 24px 48px);
+  background-position: left top;
+  background-repeat: repeat-x;
+  background-size: auto .36rem;
+}
+
+[data-game-design="pitch-panic"] [data-game-zone="round"] h2 {
+  letter-spacing: .01em;
+}
+
+[data-game-design="pitch-panic"][data-game-phase="planning"] [data-game-zone="private"] [data-game-zone="card"] {
+  border-inline-start: .4rem solid #742c37;
+  background: #fff1d7;
+  box-shadow: .25rem .25rem 0 #e5b396;
+}
+
+[data-game-design="pitch-panic"][data-game-phase="presentation"] [data-game-zone="public"] [data-game-zone="card"] {
+  padding: clamp(1.2rem, 4vw, 2.2rem);
+  border: 2px solid #a05241;
+  background: #fff1d7;
+}
+
+[data-game-design="pitch-panic"][data-game-phase="presentation"] [data-game-zone="public"] [data-game-zone="card"] h3 {
+  font-family: var(--game-display);
+  font-size: clamp(1.4rem, 4vw, 2.1rem);
+}
+
+[data-game-design="pitch-panic"][data-game-phase="voting"] [data-game-zone="actions"] form {
+  border: 1px dashed #a05241;
+  border-radius: var(--game-radius);
+  padding: .9rem;
+  background: var(--game-raised);
+}
+
+[data-game-design="pitch-panic"] [data-game-zone="standings"] ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+
+[data-game-design="pitch-panic"] [data-game-zone="standings"] li {
+  flex: 1 1 10rem;
+  padding: .55rem .8rem;
+  border: 1px solid #a05241;
+  border-radius: .35rem;
+  background: #ffdec4;
+}
+
+/* Fact or Fiction: long headline, verdict desk, and type-set source citations. */
+[data-game-design="fact-or-fiction"],
+[data-game-cover="fact-or-fiction"] {
+  --game-backdrop: linear-gradient(150deg, #324866, #101d37 76%);
+  --game-scheme: light;
+  --game-surface: #f4eee0;
+  --game-raised: #e9dfca;
+  --game-field: #fffaed;
+  --game-border: #76664f;
+  --game-ink: #17243c;
+  --game-muted: #4d4b43;
+  --game-accent: #784014;
+  --game-action: #173254;
+  --game-action-ink: #fdf5dc;
+  --game-display: Georgia, "Times New Roman", serif;
+  --game-radius: .35rem;
+  --game-motif:
+    linear-gradient(#f2b74e 0 0) 22% 33% / 55% 9% no-repeat,
+    linear-gradient(#f9efdb 0 0) 23% 53% / 54% 4% no-repeat,
+    linear-gradient(#f9efdb 0 0) 23% 65% / 54% 4% no-repeat,
+    linear-gradient(#f9efdb 0 0) 23% 77% / 46% 4% no-repeat,
+    #223956;
+}
+
+[data-game-design="fact-or-fiction"] [data-game-zone="nav"],
+[data-game-design="fact-or-fiction"] [data-game-zone="title"] {
+  color: #fff1d8;
+  --game-ink: #fff1d8;
+  --game-muted: #eadbc5;
+  --game-accent: #ffd17b;
+}
+
+[data-game-design="fact-or-fiction"] [data-game-zone="round"] {
+  border-block: 3px double #76664f;
+  padding-block: .9rem;
+}
+
+[data-game-design="fact-or-fiction"] [data-game-zone="round"] h2 {
+  max-width: 32ch;
+  font-family: var(--game-display);
+  font-size: clamp(1.7rem, 4.7vw, 3rem);
+  line-height: 1.08;
+}
+
+[data-game-design="fact-or-fiction"] [data-game-zone="public"] [data-game-zone="card"] {
+  border-inline-start: 0;
+  border-block-start: 3px solid #76664f;
+  background: #ebe2cf;
+}
+
+[data-game-design="fact-or-fiction"] [data-game-zone="private"] [data-game-zone="card"] {
+  background: #f6e4ad;
+  color: #273244;
+  border-color: #9c7442;
+}
+
+[data-game-design="fact-or-fiction"] [data-game-zone="public"] [data-game-zone="card"]:has(a) {
+  background: #fffaed;
+  border-block-start: .35rem solid #173254;
+}
+
+/* Casefile: a manila folio with indigo index tabs and private evidence slips. */
+[data-game-design="casefile"],
+[data-game-cover="casefile"] {
+  --game-backdrop: linear-gradient(135deg, #dcd4bb, #f4ecd9 65%);
+  --game-scheme: light;
+  --game-surface: #fff9e9;
+  --game-raised: #ede4cd;
+  --game-field: #fffdf5;
+  --game-border: #77728c;
+  --game-ink: #282540;
+  --game-muted: #544d63;
+  --game-accent: #4b3b83;
+  --game-action: #47417f;
+  --game-action-ink: #fff9ed;
+  --game-display: Georgia, "Times New Roman", serif;
+  --game-radius: .55rem;
+  --game-motif:
+    linear-gradient(#4b3b83 0 0) 71% 30% / 22% 12% no-repeat,
+    linear-gradient(#4b3b83 0 0) 50% 52% / 62% 38% no-repeat,
+    linear-gradient(#d3c4a3 0 0) 57% 68% / 66% 27% no-repeat,
+    #f4ecd8;
+}
+
+[data-game-design="casefile"] [data-game-zone="board"] {
+  background-image: linear-gradient(90deg, #535082 0 .35rem, transparent .35rem);
+  padding-inline-start: clamp(1rem, 4vw, 2rem);
+}
+
+[data-game-design="casefile"] [data-game-zone="round"] {
+  padding-block-end: .7rem;
+  border-block-end: 1px solid #89788a;
+}
+
+[data-game-design="casefile"] [data-game-zone="private"] [data-game-zone="card"] {
+  background: #fffdf5;
+  border: 1px solid #877f99;
+  border-block-start: .38rem solid #575183;
+  box-shadow: .2rem .2rem 0 #ddd2b8;
+}
+
+[data-game-design="casefile"] [data-game-zone="public"] {
+  grid-template-columns: 1fr;
+}
+
+[data-game-design="casefile"] [data-game-card="Submitted hypotheses"] li + li {
+  margin-block-start: .65rem;
+  padding-block-start: .65rem;
+  border-block-start: 1px solid #a69583;
+}
+
+[data-game-design="casefile"] [data-game-zone="actions"] form {
+  border: 1px solid #89788a;
+  background: #f1e8d0;
+  padding: .85rem;
+  border-radius: .4rem;
+}
+
+/* Counterpoint: a public debate floor with a script and a separate ballot. */
+[data-game-design="counterpoint"],
+[data-game-cover="counterpoint"] {
+  --game-backdrop: radial-gradient(ellipse at 70% 0, #4a3377, #211735 72%);
+  --game-surface: #33264f;
+  --game-raised: #45345e;
+  --game-field: #291e40;
+  --game-border: #9a88b1;
+  --game-ink: #fff5e2;
+  --game-muted: #e2d0e7;
+  --game-accent: #f2cf79;
+  --game-action: #f2cf79;
+  --game-action-ink: #30223f;
+  --game-display: "Palatino Linotype", Palatino, Georgia, serif;
+  --game-radius: .65rem;
+  --game-motif:
+    linear-gradient(12deg, #ebc770 0 100%) 24% 58% / 28% 6% no-repeat,
+    linear-gradient(12deg, #ebc770 0 100%) 76% 58% / 28% 6% no-repeat,
+    linear-gradient(#a87cc0 0 0) 26% 69% / 13% 24% no-repeat,
+    linear-gradient(#a87cc0 0 0) 74% 69% / 13% 24% no-repeat,
+    radial-gradient(ellipse at 25% 30%, #f8dc90 0 5%, transparent 6%),
+    radial-gradient(ellipse at 75% 30%, #f8dc90 0 5%, transparent 6%),
+    #43305f;
+}
+
+[data-game-design="counterpoint"] [data-game-zone="round"] {
+  padding-block-end: .7rem;
+  border-block-end: 3px double #c5aa71;
+}
+
+[data-game-design="counterpoint"] [data-game-card="The claim"] {
+  grid-column: 1 / -1;
+  padding-block: 1rem;
+  color: #30233f;
+  background: #f1dcad;
+  border-color: #bf9250;
+  font-family: var(--game-display);
+  font-size: 1.12rem;
+}
+
+[data-game-design="counterpoint"] [data-game-card="Speech progress"] {
+  grid-column: 1 / -1;
+  border-block-start: 1px solid #b49dbf;
+  border-inline-start: 0;
+}
+
+[data-game-design="counterpoint"] [data-game-card^="Argument"],
+[data-game-design="counterpoint"] [data-game-card^="Rebuttal"] {
+  border-block-start: 3px solid #c5aa71;
+  border-inline-start: 0;
+}
+
+[data-game-design="counterpoint"][data-game-phase="prediction"] [data-game-zone="actions"] {
+  padding: .85rem;
+  border: 1px solid #a491b4;
+  background: #291f42;
+  border-radius: var(--game-radius);
+}
+
+@media (min-width: 48rem) {
+  [data-game-design="secret-thread"][data-game-phase="puzzle"] [data-game-zone="board"] {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  }
+
+  [data-game-design="secret-thread"][data-game-phase="puzzle"] [data-game-zone="board"] > :not([data-game-zone="private"], [data-game-zone="public"]) {
+    grid-column: 1 / -1;
+  }
+
+  [data-game-design="secret-thread"][data-game-phase="puzzle"] [data-game-zone="private"],
+  [data-game-design="secret-thread"][data-game-phase="puzzle"] [data-game-zone="public"] {
+    align-content: start;
+  }
+
+  [data-game-design="casefile"] [data-game-zone="private"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  [data-game-design="casefile"][data-game-phase="investigate"] [data-game-zone="actions"] form,
+  [data-game-design="pitch-panic"][data-game-phase="voting"] [data-game-zone="actions"] form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  [data-game-design="fact-or-fiction"][data-game-phase="choice"] [data-game-zone="actions"] form,
+  [data-game-design="counterpoint"][data-game-phase="prediction"] [data-game-zone="actions"] form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :is(
+    [data-game-design="casefile"][data-game-phase="investigate"],
+    [data-game-design="pitch-panic"][data-game-phase="voting"],
+    [data-game-design="fact-or-fiction"][data-game-phase="choice"],
+    [data-game-design="counterpoint"][data-game-phase="prediction"]
+  ) [data-game-zone="actions"] form > button {
+    grid-column: 1 / -1;
+  }
+
+  [data-game-design="counterpoint"] [data-game-zone="public"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 47.99rem) {
+  [data-game-design="counterpoint"] [data-game-zone="public"],
+  [data-game-design="casefile"] [data-game-zone="private"] {
+    grid-template-columns: 1fr;
+  }
+}

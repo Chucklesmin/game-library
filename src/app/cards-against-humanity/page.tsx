@@ -153,14 +153,15 @@ export default function CardsAgainstHumanityPage() {
     setNotice("");
   };
 
-  return <main className="game-shell caption-shell">
+  return <main className="game-shell caption-shell" data-game-design="cards-against-humanity" data-game-phase={phase}>
     <header>
       <Link className="back-button caption-home" href="/">← Game Library</Link>
       <span className="game-title">Cards Against Humanity</span>
       <span className="score">3–10 players</span>
     </header>
 
-    {phase === "setup" && <section className="game-choice caption-choice">
+    {phase === "setup" && <section className="game-choice caption-choice" data-game-zone="entry">
+      <span className="game-title-mark" aria-hidden="true" />
       <p className="eyebrow">A QUICK-FIRE PARTY CARD GAME</p>
       <h1>Cards Against Humanity</h1>
       <p>Finish a strange prompt with a card or your own words. Vote with friends, or open an online room to play solo with AI opponents.</p>

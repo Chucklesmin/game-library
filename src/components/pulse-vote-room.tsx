@@ -186,19 +186,20 @@ export function PulseVoteRoom() {
     void enter("join");
   }
 
-  return <main className="game-shell">
+  return <main className="game-shell" data-game-design="pulse-vote" data-game-phase={view?.phase ?? "entry"}>
     <header>
       <Link className="brand" href="/">Game Library</Link>
       <span className="score">{PULSE_MIN_PLAYERS}–{PULSE_MAX_PLAYERS} players</span>
     </header>
     <div className={styles.shell}>
-      <div className={styles.heading}>
+      <div className={styles.heading} data-game-zone="title">
+        <span className="game-title-mark" aria-hidden="true" />
         <h1>Pulse Vote</h1>
         <p>Cast one private vote. Match the room’s most popular answer to earn a point.</p>
       </div>
       {!hasSupabase && <p role="status">Online rooms are unavailable in this environment.</p>}
       {hasSupabase && resuming && <p role="status">Looking for your room…</p>}
-      {hasSupabase && !resuming && !view && <section className={styles.panel} aria-label="Create or join a private room">
+      {hasSupabase && !resuming && !view && <section className={styles.panel} data-game-zone="entry" aria-label="Create or join a private room">
         <label className={styles.field}>Display name
           <input value={name} onChange={(event) => setName(event.target.value)} maxLength={24} autoComplete="nickname" />
         </label>
@@ -225,13 +226,13 @@ export function PulseVoteRoom() {
           {view.isHost ? <RoundSettings label="Start match" onStart={(value) => void act({ action: "start", value })}
             disabled={busy || view.players.length < PULSE_MIN_PLAYERS} /> : <p>Waiting for the host to start.</p>}
         </section>}
-        {(view.phase === "vote" || view.phase === "reveal") && view.prompt && <section className={styles.panel}>
+        {(view.phase === "vote" || view.phase === "reveal") && view.prompt && <section className={styles.panel} data-game-zone="board">
           <p className={styles.round} aria-live="polite">Round {view.round} of {view.totalRounds}{view.phase === "reveal" && " · Results"}</p>
           <h2>{view.prompt.question}</h2>
           {view.phase === "vote" && <>
             <Ballot key={view.roundId} view={view} busy={busy} onVote={(value) => void act({ action: "vote", value })} />
             {view.isHost ? <div className={styles.controls}>
-              <button className={styles.secondary} onClick={() => void act({ action: "close" })} disabled={busy}>Close voting</button>
+              <button className={styles.secondary} data-pulse-close onClick={() => void act({ action: "close" })} disabled={busy}>Close voting</button>
               <small>Close when your group is ready. Missing votes earn no points.</small>
             </div> : <p>The host closes voting for the room.</p>}
           </>}
@@ -242,7 +243,7 @@ export function PulseVoteRoom() {
             </button> : <p>Waiting for the host to continue.</p>}
           </>}
         </section>}
-        <section className={styles.panel} aria-labelledby="pulse-standings">
+        <section className={styles.panel} data-game-zone="standings" aria-labelledby="pulse-standings">
           <h2 id="pulse-standings">{view.phase === "lobby" ? `Players (${view.players.length}/${PULSE_MAX_PLAYERS})` : view.phase === "complete" ? "Final standings" : "Scoreboard"}</h2>
           <ol className={styles.scores}>
             {view.players.map((player) => <li key={player.id}>

@@ -1,0 +1,73 @@
+/* Shared visual vocabulary. Each game owns the palette, artwork and layout decisions. */
+[data-game-design] {
+  position: relative;
+  isolation: isolate;
+  color: var(--game-ink);
+}
+
+[data-game-design] { animation: none; }
+[data-game-design]::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: var(--game-backdrop, #101727);
+}
+
+[data-game-cover].game-card {
+  background: var(--game-surface, #121b30);
+  border-color: var(--game-border, #4b5e86);
+  color: var(--game-ink, #edf3ff);
+  box-shadow: 0 16px 32px #04071255;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: .9rem;
+  border-radius: var(--game-radius, 14px);
+}
+
+[data-game-cover].game-card:hover { border-color: var(--game-accent, #f6c85f); }
+[data-game-cover].game-card h2,
+[data-game-cover].game-card h3 {
+  font: 800 clamp(1.25rem, 2.1vw, 1.9rem)/1.08 var(--game-display, Georgia, serif);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+[data-game-cover].game-card p,
+[data-game-cover].game-card .game-meta { color: var(--game-muted, #c2cee4); }
+[data-game-cover].game-card .eyebrow { color: var(--game-accent, #f6c85f); }
+[data-game-cover].game-card > :last-child { margin-top: auto; }
+[data-game-cover].game-card > button {
+  background: var(--game-action, #445b9b);
+  color: var(--game-action-ink, #fff);
+  max-width: 100%;
+}
+
+.game-cover-mark, .game-title-mark {
+  border: 1px solid var(--game-border, #4b5e86);
+  display: block;
+  pointer-events: none;
+  width: 100%;
+  flex: 0 0 auto;
+  background: var(--game-motif, linear-gradient(135deg, #283654, #141e36));
+  border-radius: var(--game-radius, 12px);
+}
+.game-cover-mark { height: clamp(3.75rem, 7vw, 5rem); }
+.game-title-mark { height: clamp(3.5rem, 10vw, 7rem); }
+
+[data-game-design] :where(button, a, summary, input, select, textarea, canvas):focus-visible,
+[data-game-cover]:focus-visible, [data-game-cover] button:focus-visible {
+  outline: 3px solid var(--game-accent, #f6c85f);
+  outline-offset: 3px;
+}
+[data-game-design] a:focus-visible,
+[data-game-cover]:focus-visible { text-decoration: underline; }
+
+@media (forced-colors: active) {
+  .game-cover-mark, .game-title-mark { background: Canvas; border: 2px solid CanvasText; }
+  [data-game-design]::before { background: Canvas; }
+  [data-game-design] :where(button, a, summary, input, select, textarea, canvas):focus-visible,
+  [data-game-cover]:focus-visible, [data-game-cover] button:focus-visible { outline-color: Highlight; }
+}

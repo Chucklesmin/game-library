@@ -25,7 +25,8 @@ export function RoadmapCatalog() {
         aria-pressed={filter === id}>{label}</button>)}
     </div>
     <div className="game-grid">
-      {games.map((game) => <Link href={`/games/${game.slug}`} key={game.slug} className="game-card caption-card-link">
+      {games.map((game) => <Link href={`/games/${game.slug}`} key={game.slug} className="game-card caption-card-link" data-game-cover={game.slug}>
+        <span className="game-cover-mark" aria-hidden="true" />
         <div>
           <h3>{game.referenceName ?? game.title}</h3>
           {game.referenceName && <p className="game-meta">Game Library variant · {game.title}</p>}

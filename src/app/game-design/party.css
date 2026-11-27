@@ -1,0 +1,362 @@
+/* Caption Clash: a lit prompt, then separate response slips. */
+[data-game-design="caption-clash"],
+[data-game-cover="caption-clash"] {
+  --game-backdrop: radial-gradient(ellipse at 50% -15%, #6a355b, #2a172f 52%, #1d1223 90%);
+  --game-surface: #342039;
+  --game-raised: #4b2d4d;
+  --game-field: #25172b;
+  --game-border: #ad829a;
+  --game-ink: #fff3ef;
+  --game-muted: #efcddc;
+  --game-accent: #ffd1a7;
+  --game-action: #ffd1a7;
+  --game-action-ink: #341f39;
+  --game-display: "Trebuchet MS", system-ui, sans-serif;
+  --game-radius: 1.65rem;
+  --game-motif:
+    radial-gradient(circle at 21% 22%, #ffd1a7 0 2%, transparent 2.7%),
+    radial-gradient(circle at 80% 72%, #ffd1a7 0 2%, transparent 2.7%),
+    linear-gradient(153deg, transparent 25%, #ffbe9b 26% 42%, transparent 43%),
+    linear-gradient(28deg, transparent 38%, #e78baf 39% 69%, transparent 70%),
+    #65385f;
+}
+[data-game-design="caption-clash"] [data-game-zone="board"] {
+  border-top-width: 5px;
+  padding: clamp(1rem, 3.75vw, 2.25rem);
+}
+[data-game-design="caption-clash"] [data-game-zone="round"] {
+  justify-content: center;
+  padding: clamp(1.15rem, 4.6vw, 2.2rem);
+  border: 1px solid var(--game-border);
+  border-radius: 1.1rem;
+  background:
+    radial-gradient(ellipse at 50% 0, #79476e, transparent 68%),
+    #422543;
+  text-align: center;
+}
+[data-game-design="caption-clash"] [data-game-zone="round"] h2 {
+  max-width: 24ch;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  line-height: 1.07;
+}
+[data-game-design="caption-clash"] [data-game-zone="detail"] {
+  text-align: center;
+}
+[data-game-design="caption-clash"] [data-game-zone="public"] [data-game-zone="card"] {
+  background: #fff0e6;
+  border-color: #b5688b;
+  color: #341f39;
+  border-radius: 0.65rem 0.65rem 0.95rem 0.95rem;
+  box-shadow: inset 0 -3px #eabebf;
+}
+[data-game-design="caption-clash"] [data-game-zone="public"] [data-game-zone="card"] :is(h2, h3, h4) {
+  color: #5a294c;
+}
+[data-game-design="caption-clash"] [data-game-zone="public"] [data-game-zone="card"] p {
+  color: #341f39;
+  font-weight: 650;
+}
+[data-game-design="caption-clash"] [data-game-zone="actions"] {
+  padding: 1rem;
+  background: #25172b;
+  border: 1px solid #956681;
+  border-radius: 0.8rem;
+}
+[data-game-design="caption-clash"][data-game-phase="reveal"] [data-game-zone="round"],
+[data-game-design="caption-clash"][data-game-phase="finished"] [data-game-zone="round"] {
+  border-color: #ffd1a7;
+  box-shadow: inset 0 0 0 3px #5d3c5a;
+}
+[data-game-design="caption-clash"] [data-game-zone="standings"] li {
+  border-bottom: 2px dotted #9b6e8e;
+}
+@media (min-width: 43rem) {
+  [data-game-design="caption-clash"] [data-game-zone="public"]:has(> [data-game-zone="card"] + [data-game-zone="card"]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Crowd Call: a polling desk with a separate room-side ledger. */
+[data-game-design="crowd-call"],
+[data-game-cover="crowd-call"] {
+  --game-backdrop: linear-gradient(155deg, #172e44 0%, #0d1a29 58%, #15242d 100%);
+  --game-surface: #14283b;
+  --game-raised: #203a51;
+  --game-field: #0c1b29;
+  --game-border: #7a9eb6;
+  --game-ink: #edf7ff;
+  --game-muted: #c2d7e8;
+  --game-accent: #77e9d6;
+  --game-action: #77e9d6;
+  --game-action-ink: #0a2930;
+  --game-display: ui-sans-serif, "Segoe UI", system-ui, sans-serif;
+  --game-radius: 0.7rem;
+  --game-motif:
+    linear-gradient(0deg, #69daca 0 85%, transparent 85%) 14% 46% / 63% 8% no-repeat,
+    linear-gradient(0deg, #ffab9e 0 85%, transparent 85%) 14% 66% / 42% 8% no-repeat,
+    linear-gradient(0deg, #69daca 0 85%, transparent 85%) 14% 86% / 71% 8% no-repeat,
+    #1b364e;
+}
+[data-game-design="crowd-call"] [data-game-zone="round"] {
+  padding: 0.85rem 1.1rem;
+  border-inline-start: 0.4rem solid #77e9d6;
+  background: #0d1f31;
+}
+[data-game-design="crowd-call"][data-game-phase="voting" i] [data-game-zone="round"] {
+  border-inline-start-color: #ffab9e;
+}
+[data-game-design="crowd-call"] [data-game-zone="detail"] {
+  font-variant-numeric: tabular-nums;
+}
+[data-game-design="crowd-call"] [data-game-zone="private"] {
+  padding: 0.7rem;
+  border-block: 1px dashed #7ba7ba;
+  background: #102231;
+}
+[data-game-design="crowd-call"] [data-game-zone="private"] [data-game-zone="card"] {
+  border-inline-start: 3px solid #77e9d6;
+}
+[data-game-design="crowd-call"] [data-game-zone="public"] [data-game-zone="card"] ul {
+  margin-inline: 0;
+  padding: 0;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+[data-game-design="crowd-call"] [data-game-zone="public"] [data-game-zone="card"] li {
+  padding: 0.58rem 0.5rem;
+  border-bottom: 1px solid #6c8a9e;
+}
+[data-game-design="crowd-call"] [data-game-zone="public"] [data-game-zone="card"] li:nth-child(even) {
+  background: #152a3d;
+}
+[data-game-design="crowd-call"] [data-game-zone="actions"] {
+  padding: 0.85rem;
+  border-inline-start: 3px solid #ffab9e;
+  background: #102231;
+  align-items: end;
+}
+@media (min-width: 48rem) {
+  [data-game-design="crowd-call"] [data-game-zone="board"]:has(> [data-game-zone="private"]):has(> [data-game-zone="public"]) {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.2fr);
+    align-items: start;
+  }
+  [data-game-design="crowd-call"] [data-game-zone="board"] > :not([data-game-zone="private"], [data-game-zone="public"]) {
+    grid-column: 1 / -1;
+  }
+  [data-game-design="crowd-call"] [data-game-zone="private"],
+  [data-game-design="crowd-call"] [data-game-zone="public"] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sketch Relay: a wide sketchbook with rails for ink and guesses. */
+[data-game-design="sketch-relay"],
+[data-game-cover="sketch-relay"] {
+  --game-backdrop: linear-gradient(156deg, #254b95 0%, #162b67 56%, #101f4a 100%);
+  --game-surface: #182e64;
+  --game-raised: #25477f;
+  --game-field: #101f4a;
+  --game-border: #94b0ed;
+  --game-ink: #fbf8f2;
+  --game-muted: #d7e4ff;
+  --game-accent: #ffda9c;
+  --game-action: #ffda9c;
+  --game-action-ink: #182e64;
+  --game-display: "Trebuchet MS", system-ui, sans-serif;
+  --game-radius: 0.9rem;
+  --game-motif:
+    linear-gradient(145deg, transparent 40%, #e99757 41% 49%, transparent 50%) 0 0 / 92% 84% no-repeat,
+    linear-gradient(68deg, transparent 56%, #264785 57% 61%, transparent 62%) 0 0 / 85% 100% no-repeat,
+    repeating-linear-gradient(0deg, #fff7e6 0 14%, #ddd8c9 15% 16%);
+}
+[data-game-design="sketch-relay"] {
+  --game-width: 67rem;
+}
+[data-game-design="sketch-relay"] [data-game-zone="board"] {
+  border-top: 5px solid #a7c1fb;
+}
+[data-game-design="sketch-relay"] [data-game-zone="private"] [data-game-zone="card"] {
+  background: #203e71;
+  border-inline-start: 0.32rem solid #ffda9c;
+}
+[data-game-design="sketch-relay"] [data-game-zone="tools"] {
+  min-width: 0;
+  padding: clamp(0.58rem, 2vw, 0.95rem);
+  background: #112653;
+  border: 1px solid #789be2;
+  border-radius: 0.65rem;
+}
+[data-game-design="sketch-relay"] [data-game-zone="tools"] canvas {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, #ded9ca 27px 28px),
+    #fff8e9;
+  border: 1px solid #575b73;
+  border-radius: 0.35rem;
+}
+[data-game-design="sketch-relay"] [data-game-zone="tools"] :has(> label):has(> span) {
+  padding: 0.6rem;
+  background: #25477f;
+  border-inline-start: 4px solid #ffda9c;
+  border-radius: 0.35rem;
+}
+[data-game-design="sketch-relay"] [data-game-zone="tools"] small {
+  display: block;
+  margin-top: 0.52rem;
+  line-height: 1.55;
+  color: #e4edff;
+}
+@media (min-width: 57rem) {
+  [data-game-design="sketch-relay"] [data-game-zone="board"]:has(> [data-game-zone="tools"]) {
+    grid-template-columns: minmax(0, 2.2fr) minmax(15rem, 1fr);
+    align-items: start;
+  }
+  [data-game-design="sketch-relay"] [data-game-zone="board"]:has(> [data-game-zone="tools"]) > :is([data-game-zone="round"], [data-game-zone="detail"], [data-game-zone="private"], [data-game-zone="public"], [data-game-zone="rematch"]) {
+    grid-column: 1 / -1;
+  }
+  [data-game-design="sketch-relay"] [data-game-zone="tools"] {
+    grid-row: span 2;
+  }
+  [data-game-design="sketch-relay"] [data-game-zone="board"]:has(> [data-game-zone="tools"]) > :is([data-game-zone="actions"], [data-game-zone="standings"]) {
+    grid-column: 2;
+  }
+}
+
+/* Imposter: protected field notes above a shared clue ledger. */
+[data-game-design="imposter"],
+[data-game-cover="imposter"] {
+  --game-backdrop: radial-gradient(ellipse at 18% 4%, #204b39, #102a23 54%, #122118 90%);
+  --game-surface: #142f27;
+  --game-raised: #23483a;
+  --game-field: #0e221c;
+  --game-border: #83ac89;
+  --game-ink: #f1f8e9;
+  --game-muted: #d4e2ca;
+  --game-accent: #c7eb82;
+  --game-action: #c7eb82;
+  --game-action-ink: #142c24;
+  --game-display: Georgia, "Times New Roman", serif;
+  --game-radius: 0.9rem;
+  --game-motif:
+    linear-gradient(90deg, transparent 30%, #a4c965 31% 52%, transparent 53%) 54% 61% / 70% 22% no-repeat,
+    linear-gradient(#4f7d51 1px, transparent 1px) 50% 50% / 18px 18px,
+    linear-gradient(90deg, #4f7d51 1px, transparent 1px) 50% 50% / 18px 18px,
+    #1a4636;
+}
+[data-game-design="imposter"] [data-game-zone="board"] {
+  box-shadow: inset 0 0 0 0.3rem #0e221c;
+}
+[data-game-design="imposter"] [data-game-zone="round"] {
+  padding-block-end: 0.85rem;
+  border-bottom: 3px double var(--game-border);
+}
+[data-game-design="imposter"] [data-game-zone="private"] {
+  padding: 0.8rem;
+  border: 2px dashed #9cc16e;
+  border-radius: 0.65rem;
+  background: #10251d;
+}
+[data-game-design="imposter"] [data-game-zone="private"] [data-game-zone="card"] {
+  border-inline-start: 4px solid #c7eb82;
+}
+[data-game-design="imposter"] [data-game-zone="public"] [data-game-zone="card"] ul {
+  margin-inline: 0;
+  padding: 0;
+  list-style: decimal-leading-zero inside;
+}
+[data-game-design="imposter"] [data-game-zone="public"] [data-game-zone="card"] li {
+  padding: 0.38rem 0.35rem;
+  border-bottom: 1px dashed #81a180;
+}
+[data-game-design="imposter"] [data-game-zone="public"] [data-game-zone="card"] li::marker {
+  color: #c7eb82;
+  font: 700 0.78rem ui-monospace, monospace;
+}
+[data-game-design="imposter"][data-game-phase="reveal" i] [data-game-zone="public"] [data-game-zone="card"]:first-child {
+  border-inline-start: 4px solid #c7eb82;
+}
+@media (min-width: 48rem) {
+  [data-game-design="imposter"] [data-game-zone="board"]:has(> [data-game-zone="private"]):has(> [data-game-zone="public"]) {
+    grid-template-columns: minmax(15rem, 0.85fr) minmax(0, 1.4fr);
+    align-items: start;
+  }
+  [data-game-design="imposter"] [data-game-zone="board"] > :not([data-game-zone="private"], [data-game-zone="public"]) {
+    grid-column: 1 / -1;
+  }
+  [data-game-design="imposter"] [data-game-zone="private"],
+  [data-game-design="imposter"]:has([data-game-zone="private"]) [data-game-zone="public"] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Alibi: cream statements and a dark wooden hearing rail. */
+[data-game-design="alibi"],
+[data-game-cover="alibi"] {
+  --game-backdrop: linear-gradient(145deg, #4a202b, #301b23 57%, #231923 95%);
+  --game-surface: #442832;
+  --game-raised: #593640;
+  --game-field: #311e27;
+  --game-border: #bc949b;
+  --game-ink: #fff3ea;
+  --game-muted: #e7cccf;
+  --game-accent: #ffc8a1;
+  --game-action: #ffc8a1;
+  --game-action-ink: #3b242e;
+  --game-display: Georgia, "Times New Roman", serif;
+  --game-radius: 0.45rem;
+  --game-motif:
+    linear-gradient(0deg, #814b55 0 32%, transparent 33%),
+    linear-gradient(0deg, #f1ceb3 0 100%) 60% 20% / 58% 65% no-repeat,
+    repeating-linear-gradient(90deg, #5f3342 0 8px, #713f4c 8px 10px);
+}
+[data-game-design="alibi"] [data-game-zone="round"] {
+  padding: 0.85rem 1rem;
+  border-block: 4px double #bc949b;
+  background: #321f27;
+}
+[data-game-design="alibi"] [data-game-zone="public"] {
+  grid-template-columns: 1fr;
+}
+[data-game-design="alibi"] [data-game-zone="public"] [data-game-zone="card"] {
+  border-color: #ac787f;
+  background: #fff0db;
+  color: #39262b;
+  box-shadow: inset 0 0 0 2px #f4ddc6;
+}
+[data-game-design="alibi"] [data-game-zone="public"] [data-game-zone="card"] :is(h2, h3, h4, p) {
+  color: #39262b;
+}
+[data-game-design="alibi"] [data-game-zone="public"] [data-game-zone="card"] ul {
+  margin-inline: 0;
+  padding: 0;
+  list-style: decimal-leading-zero inside;
+}
+[data-game-design="alibi"] [data-game-zone="public"] [data-game-zone="card"] li {
+  padding: 0.46rem 0.3rem;
+  border-bottom: 1px solid #b88786;
+}
+[data-game-design="alibi"] [data-game-zone="public"] [data-game-zone="card"] li::marker {
+  color: #713545;
+  font: 700 0.78rem ui-monospace, monospace;
+}
+[data-game-design="alibi"] [data-game-zone="private"] {
+  padding: 0.7rem;
+  border: 1px solid #bc949b;
+  background: #321f27;
+}
+[data-game-design="alibi"] [data-game-zone="actions"] {
+  padding: 0.8rem;
+  background: #351f29;
+  border-top: 3px solid #b97d7c;
+}
+@media (min-width: 52rem) {
+  [data-game-design="alibi"] [data-game-zone="board"]:has(> [data-game-zone="private"]):has(> [data-game-zone="public"]) {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.7fr);
+    align-items: start;
+  }
+  [data-game-design="alibi"] [data-game-zone="board"] > :not([data-game-zone="private"], [data-game-zone="public"]) {
+    grid-column: 1 / -1;
+  }
+  [data-game-design="alibi"] [data-game-zone="private"] {
+    grid-template-columns: 1fr;
+  }
+}

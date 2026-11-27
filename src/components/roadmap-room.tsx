@@ -29,10 +29,11 @@ async function requestRoom(slug: string, payload?: object, roomId?: string): Pro
 }
 
 function Cards({ cards, heading }: { cards: DisplayCard[]; heading?: string }) {
-  return <section className={styles.cards} aria-label={heading}>
-    {heading && <h2 className={styles.groupLabel}>{heading}</h2>}
-    {cards.map((card, index) => <article className={styles.card} key={`${card.title}:${index}`}>
-      <h2>{card.title}</h2>
+  const CardHeading = heading ? "h4" : "h3";
+  return <section className={styles.cards} data-game-zone={heading ? "private" : "public"} aria-label={heading}>
+    {heading && <h3 className={styles.groupLabel}>{heading}</h3>}
+    {cards.map((card, index) => <article className={styles.card} data-game-zone="card" data-game-card={card.title} key={`${card.title}:${index}`}>
+      <CardHeading>{card.title}</CardHeading>
       {card.body && <p>{card.body}</p>}
       {card.link?.href.startsWith("https://") && <a href={card.link.href} target="_blank" rel="noopener noreferrer">{card.link.label}</a>}
       {!!card.items?.length && <ul>{card.items.map((item, itemIndex) => <li key={itemIndex}>{item}</li>)}</ul>}
@@ -44,9 +45,9 @@ function MoveControl({ control, pending, move }: {
   control: GameControl; pending: boolean; move: (id: string, values?: Record<string, string>) => Promise<boolean>;
 }) {
   if (!control.fields?.length) {
-    return <button type="button" disabled={pending} onClick={() => void move(control.id)}>{control.label}</button>;
+    return <button type="button" data-game-action={control.label} disabled={pending} onClick={() => void move(control.id)}>{control.label}</button>;
   }
-  return <form className={styles.actionForm} onSubmit={async (event) => {
+  return <form className={styles.actionForm} data-game-action={control.label} onSubmit={async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
     const values = Object.fromEntries(Array.from(new FormData(form), ([key, value]) => [key, String(value)]));
@@ -206,19 +207,20 @@ export function RoadmapRoom({ game, configured, inviteCode }: { game: GameInfo; 
   const view = room?.game;
   const playerRange = game.minimumPlayers === game.maximumPlayers ? game.minimumPlayers
     : `${game.minimumPlayers}–${game.maximumPlayers}`;
-  return <main className={styles.shell}>
-    <header className={styles.header}>
+  return <main className={styles.shell} data-game-design={game.slug} data-game-phase={view?.phase ?? (room ? "lobby" : "entry")}>
+    <header className={styles.header} data-game-zone="nav">
       <Link href="/">← Game Library</Link>
       <span>{playerRange} players</span>
     </header>
-    <div className={styles.title}>
+    <div className={styles.title} data-game-zone="title">
+      <span className="game-title-mark" aria-hidden="true" />
       <h1>{game.title}</h1>
       {!view && <p>{game.description}</p>}
     </div>
     {failure && <p role="alert" className={styles.error}>{failure}</p>}
     {!room ? <>
       {restoring ? <p role="status">Reopening your room…</p> : configured ?
-        <form onSubmit={enter} className={styles.entry}>
+        <form onSubmit={enter} className={styles.entry} data-game-zone="entry">
           <label>Display name<input value={name} onChange={(event) => setName(event.target.value)} maxLength={24} required autoComplete="nickname" /></label>
           <label>Room code<input value={code} onChange={(event) => setCode(event.target.value.toUpperCase().replace(/[^0-9A-F]/g, "").slice(0, 6))}
             maxLength={6} spellCheck={false} autoCapitalize="characters" placeholder="Six characters" /></label>
@@ -229,9 +231,9 @@ export function RoadmapRoom({ game, configured, inviteCode }: { game: GameInfo; 
                 <button className={styles.secondary} value="join" disabled={pending || code.length !== 6}>Join room</button></>}
           </div>
         </form> : <p role="status">Online rooms are temporarily unavailable.</p>}
-      <details className={styles.rules} open><summary>How to play</summary><ol>{game.instructions.map((instruction) => <li key={instruction}>{instruction}</li>)}</ol></details>
+      <details className={styles.rules} data-game-zone="rules" open><summary>How to play</summary><ol>{game.instructions.map((instruction) => <li key={instruction}>{instruction}</li>)}</ol></details>
     </> : <>
-      {!view && <section className={styles.lobby} aria-label="Room lobby">
+      {!view && <section className={styles.lobby} data-game-zone="lobby" aria-label="Room lobby">
         <div className={styles.roomCode}>
           <div><span>Room code</span><strong>{room.code}</strong></div>
           <button className={styles.secondary} onClick={() => void copyInvite()}>Copy invite link</button>
@@ -243,26 +245,26 @@ export function RoadmapRoom({ game, configured, inviteCode }: { game: GameInfo; 
         {room.isHost ? <button disabled={pending || room.players.length < game.minimumPlayers} onClick={() => void move("$start")}>Start game</button>
           : <p>The host starts when everyone is ready.</p>}
       </section>}
-      {view && <section className={styles.board}>
-        <div className={styles.boardHeading}>
-          <div aria-live="polite"><p className={styles.groupLabel}>{view.round}</p><h2>{view.heading}</h2></div>
+      {view && <section className={styles.board} data-game-zone="board" aria-labelledby="current-game-round">
+        <div className={styles.boardHeading} data-game-zone="round">
+          <div aria-live="polite"><p className={styles.groupLabel}>{view.round}</p><h2 id="current-game-round">{view.heading}</h2></div>
           {view.deadline && <Countdown deadlineAt={new Date(view.deadline).toISOString()} onExpired={expire} />}
         </div>
-        {view.detail && <p>{view.detail}</p>}
+        {view.detail && <p data-game-zone="detail">{view.detail}</p>}
         {!!view.privateCards?.length && <Cards cards={view.privateCards} heading={view.privateHeading ?? "Only you can see this"} />}
         {!!view.cards?.length && <Cards cards={view.cards} />}
         {view.drawing && <RoadmapDrawing key={"drawing:" + room.turn} drawing={view.drawing}
           send={(id, data) => move(id, { stroke: data })} pending={pending} />}
-        {view.controls.length > 0 && <div className={styles.actions} key={"controls:" + room.turn}>
+        {view.controls.length > 0 && <div className={styles.actions} data-game-zone="actions" key={"controls:" + room.turn}>
           {view.controls.map((control) => <MoveControl key={control.id} control={control} pending={pending} move={move} />)}
         </div>}
-        {!!view.standings?.length && <section className={styles.standings} aria-label="Standings">
+        {!!view.standings?.length && <section className={styles.standings} data-game-zone="standings" aria-label="Standings">
           <h2>Scoreboard</h2>
           <ul>{view.standings.map((entry, index) => <li key={`${entry.label}:${index}`}><span>{entry.label}</span><strong>{entry.score}</strong></li>)}</ul>
         </section>}
-        {view.finished && room.isHost && <button disabled={pending} onClick={() => void move("$start")}>Start a fresh match</button>}
+        {view.finished && room.isHost && <button data-game-zone="rematch" disabled={pending} onClick={() => void move("$start")}>Start a fresh match</button>}
       </section>}
-      <div className={styles.footer}>
+      <div className={styles.footer} data-game-zone="footer">
         <button className={styles.secondary} onClick={() => void refresh()}>Refresh room</button>
         <button className={styles.secondary} onClick={exit}>Back to game setup</button>
       </div>

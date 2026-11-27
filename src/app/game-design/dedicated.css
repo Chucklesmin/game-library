@@ -1,0 +1,135 @@
+[data-game-design="wavelength"], [data-game-cover="wavelength"] {
+  --game-backdrop: repeating-linear-gradient(94deg,#33211900 0 11px,#160c0540 12px 14px), radial-gradient(ellipse at 46% 10%,#695137,#2c1d18 62%,#19100d);
+  --game-ink:#fff2d8; --game-muted:#dfc8ad; --game-border:#b08957;
+  --game-surface:#273c36; --game-raised:#34483d; --game-field:#192821;
+  --game-accent:#ffcc72; --game-action:#ffcc72; --game-action-ink:#292015;
+  --game-display:Georgia,serif; --game-radius:14px;
+  --game-motif:radial-gradient(circle at 50% 90%,#ffe7aa 0 7%,#493724 7.5% 11%,#c47b39 11.5% 25%,#f9c974 25.5% 31%,#436957 31.5% 49%,#1c3027 50% 63%,transparent 63.5%),repeating-linear-gradient(90deg,#2b1e19 0 8px,#3b2c23 8px 10px);
+  --ink:var(--game-ink); --muted:var(--game-muted); --gold:var(--game-accent); --coral:#ffc16a; --blue:#9dc8b7;
+}
+[data-game-design="wavelength"] .game-choice { margin-top:clamp(1.75rem,4vw,3.25rem); }
+[data-game-design="wavelength"] .game-title-mark { margin-bottom:1.3rem; border:4px double #c09561; }
+[data-game-design="wavelength"] .play-options article,
+[data-game-design="wavelength"] .room-ready { background:var(--game-surface); border-color:var(--game-border); border-radius:8px; }
+[data-game-design="wavelength"] .room-roster li,
+[data-game-design="wavelength"] .wavelength-reveal div { background:var(--game-field); border-color:var(--game-border); }
+[data-game-design="wavelength"] .game-setup { background:#202f27; border-color:#9b8055; }
+[data-game-design="wavelength"] .game-setup :is(label,p) { color:var(--game-ink); }
+[data-game-design="wavelength"] :is(input:not([type=range]),select,.copy-button) {
+  background:var(--game-field); color:var(--game-ink); border-color:var(--game-border);
+}
+[data-game-design="wavelength"] .game-board {
+  background:linear-gradient(180deg,#31453b,var(--game-field));
+  border:5px double var(--game-border);
+  border-radius:20px;
+}
+[data-game-design="wavelength"] .round-badge {
+  background:#9a5e2e; color:#fff8e8; border-bottom-right-radius:10px;
+}
+[data-game-design="wavelength"] .spectrum {
+  background:#17251e; border-bottom:1px solid #b0895780; padding-inline:clamp(.7rem,5vw,4rem);
+}
+[data-game-design="wavelength"] .spectrum div {
+  height:8px;
+  background:linear-gradient(90deg,#7ac7ac,#fff1bc 49%,#ef8f49);
+  border-radius:50px;
+}
+[data-game-design="wavelength"] .dial-wrap {
+  background:radial-gradient(ellipse at 50% 75%,#385449,#10251e 80%);
+  padding:clamp(.45rem,3vw,1.75rem);
+  border:2px solid #917246;
+  border-radius:50% 50% 9px 9px / 22% 22% 9px 9px;
+  box-shadow:inset 0 7px 18px #050c0977,0 8px 0 #12181166;
+}
+[data-game-design="wavelength"] .dial-base { stroke:#678070; }
+[data-game-design="wavelength"] .dial-band.outer { stroke:#ead09d; }
+[data-game-design="wavelength"] .dial-band.middle { stroke:#e6a654; }
+[data-game-design="wavelength"] .dial-band.center { stroke:#ce6d49; }
+[data-game-design="wavelength"] .dial-slider { width:100%; min-height:2.75rem; background:transparent; }
+[data-game-design="wavelength"] .panel button:not(.back-button),
+[data-game-design="wavelength"] .game-choice button:not(.copy-button) { background:var(--game-action); color:var(--game-action-ink); }
+
+[data-game-design="pulse-vote"], [data-game-cover="pulse-vote"] {
+  --game-backdrop:linear-gradient(150deg,#071727,#111c3e 57%,#102522);
+  --game-ink:#f1fffa; --game-muted:#c2d6eb; --game-border:#537c91;
+  --game-surface:#102741; --game-raised:#1c3b53; --game-field:#0d1e32;
+  --game-accent:#c9fd85; --game-action:#c9fd85; --game-action-ink:#13211a;
+  --game-display:var(--font-geist-sans),sans-serif; --game-radius:9px;
+  --game-motif:linear-gradient(#c4ff84,#c4ff84) 22% 64%/10% 31% no-repeat,linear-gradient(#54d2cb,#54d2cb) 40% 48%/10% 63% no-repeat,linear-gradient(#c4ff84,#c4ff84) 58% 59%/10% 44% no-repeat,linear-gradient(#54d2cb,#54d2cb) 76% 71%/10% 18% no-repeat,repeating-linear-gradient(0deg,#0f2034 0 10px,#192e46 10px 11px);
+  --ink:var(--game-ink); --muted:var(--game-muted); --gold:var(--game-accent); --blue:#64d7cb;
+}
+[data-game-design="pulse-vote"] .game-title-mark { height:clamp(3.75rem,8vw,5.25rem); margin-bottom:.75rem; }
+[data-game-design="pulse-vote"] [data-game-zone="title"] h1 {
+  font:950 clamp(3rem,8vw,5rem)/.95 var(--game-display);
+  letter-spacing:-.055em;
+}
+[data-game-design="pulse-vote"] [data-game-zone="board"] {
+  border-top:4px solid var(--game-accent);
+  background:linear-gradient(155deg,#19374b,var(--game-surface) 65%);
+}
+[data-game-design="pulse-vote"] [data-game-zone="board"] h2 { font-family:var(--game-display); font-weight:850; }
+[data-game-design="pulse-vote"] input:not([type=radio]),
+[data-game-design="pulse-vote"] select { background:var(--game-field); color:var(--game-ink); border-color:var(--game-border); }
+[data-game-design="pulse-vote"] [data-game-zone="standings"] { border-left:4px solid #64d7cb; }
+[data-game-design="pulse-vote"] :is([data-game-zone="entry"],[data-game-zone="board"],[data-game-zone="standings"]) button {
+  background:var(--game-action); color:var(--game-action-ink);
+}
+[data-game-design="pulse-vote"] button[data-pulse-close] { background:#1e3d52; color:var(--game-ink); border:1px solid var(--game-border); }
+
+[data-game-design="cards-against-humanity"], [data-game-cover="cards-against-humanity"] {
+  --game-backdrop:repeating-linear-gradient(122deg,#1e1919 0 3px,#221c1c 3px 5px);
+  --game-ink:#fff1da; --game-muted:#e2cdb3; --game-border:#a58270;
+  --game-surface:#2b2322; --game-raised:#3b2c29; --game-field:#221a19;
+  --game-accent:#ffae95; --game-action:#ffa68b; --game-action-ink:#27140b;
+  --game-display:var(--font-geist-sans),sans-serif; --game-radius:10px;
+  --game-motif:linear-gradient(155deg,transparent 27%,#e8d1ac 27.5% 49%,transparent 49.5%) 12% 7%/67% 94% no-repeat,linear-gradient(18deg,transparent 20%,#432d29 21% 55%,#ff9a77 56% 59%,transparent 60%) 100% 0/57% 100% no-repeat,#201717;
+  --ink:var(--game-ink); --muted:var(--game-muted); --gold:var(--game-accent); --coral:var(--game-action);
+}
+[data-game-design="cards-against-humanity"] .game-title-mark { margin-bottom:1.2rem; }
+[data-game-design="cards-against-humanity"] .caption-choice,
+[data-game-design="cards-against-humanity"] .caption-board { margin-top:clamp(1.75rem,4vw,3rem); }
+[data-game-design="cards-against-humanity"] :is(.caption-choice h1,.caption-results-inner h1) {
+  font-family:var(--game-display); font-weight:950; letter-spacing:-.06em;
+}
+[data-game-design="cards-against-humanity"] :is(.caption-setup-card,.caption-board,.cah-online,.cah-online-action) {
+  background:var(--game-surface); border-color:var(--game-border); border-radius:var(--game-radius);
+}
+[data-game-design="cards-against-humanity"] .caption-board { min-height:0; }
+[data-game-design="cards-against-humanity"] :is(.caption-turn,.caption-vote,.caption-results-inner) {
+  width:min(100%,46rem); align-content:start; min-height:28rem;
+}
+[data-game-design="cards-against-humanity"] .caption-prompt {
+  background:#171310; color:#fff1d9; border:1px solid #b98c79;
+  border-left:7px solid #ffa68b; box-shadow:0 8px 0 #120b08;
+  font:850 clamp(1.25rem,4vw,2rem)/1.27 var(--game-display); text-align:left;
+  overflow-wrap:anywhere;
+}
+[data-game-design="cards-against-humanity"] :is(.caption-answer,.cah-result-card,.caption-winner) {
+  background:#f7ead1; color:#2a1f19; border-color:#e3c1a8;
+  border-radius:10px; box-shadow:0 4px 0 #100a07;
+}
+[data-game-design="cards-against-humanity"] .caption-answer span,
+[data-game-design="cards-against-humanity"] :is(.caption-winner,.cah-result-card) .caption-win-label { color:#6a392c; }
+[data-game-design="cards-against-humanity"] .caption-answer:hover:not(:disabled) { background:#fff6e4; color:#2a1f19; }
+[data-game-design="cards-against-humanity"] .cah-hand-option > button[aria-pressed=true] {
+  background:#ffd8bf; color:#2a1f19; border:2px solid #bd583e;
+}
+[data-game-design="cards-against-humanity"] .cah-card-preview {
+  margin-top:.7rem; padding:.85rem; border-radius:8px; background:var(--game-field); border-left:4px solid var(--game-accent);
+}
+[data-game-design="cards-against-humanity"] :is(.caption-scoreboard li,.caption-player-list li) {
+  background:var(--game-raised); border-color:var(--game-border);
+}
+[data-game-design="cards-against-humanity"] :is(input:not([type=checkbox]), select, textarea) {
+  background:var(--game-field); color:var(--game-ink); border-color:var(--game-border);
+}
+[data-game-design="cards-against-humanity"] .caption-primary { background:var(--game-action); color:var(--game-action-ink); }
+
+@media(max-width:650px) {
+  [data-game-design="wavelength"] .game-board .panel { min-height:26rem; padding:1.75rem .75rem; }
+  [data-game-design="wavelength"] .wavelength-reveal { gap:.35rem; }
+  [data-game-design="wavelength"] .wavelength-reveal div { min-width:4.75rem; padding:.4rem; }
+  [data-game-design="pulse-vote"] [data-game-zone="board"] :is(h2,p) { overflow-wrap:anywhere; }
+  [data-game-design="cards-against-humanity"] .cah-hand { grid-template-columns:1fr; }
+  [data-game-design="cards-against-humanity"] :is(.caption-turn,.caption-vote,.caption-results-inner) { padding-inline:.75rem; }
+}

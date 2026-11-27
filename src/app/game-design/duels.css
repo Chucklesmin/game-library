@@ -1,0 +1,352 @@
+/* Cipher Pair: two halves of a ruled cipher notebook. */
+[data-game-design="cipher-pair"], [data-game-cover="cipher-pair"] {
+  --game-backdrop: radial-gradient(ellipse at 70% 6%, #302053, #120e24 58%, #0d0a1a);
+  --game-surface: #211936;
+  --game-raised: #2d2246;
+  --game-field: #171226;
+  --game-border: #8b75ac;
+  --game-ink: #f7f1ff;
+  --game-muted: #d1c0e8;
+  --game-accent: #e5beff;
+  --game-action: #e5beff;
+  --game-action-ink: #271735;
+  --game-display: "Courier New", ui-monospace, monospace;
+  --game-radius: .45rem;
+  --game-motif:
+    linear-gradient(#281b44, #281b44) 50% 50% / 9% 100% no-repeat,
+    radial-gradient(circle, #e5beff 20%, transparent 23%) 0 0 / 25% 50%,
+    repeating-linear-gradient(0deg, #4a3568 0 1px, #302047 1px 9px);
+}
+
+[data-game-design="cipher-pair"] [data-game-zone="board"] {
+  border-top: 4px solid var(--game-accent);
+}
+
+[data-game-design="cipher-pair"] [data-game-zone="round"] h2 {
+  letter-spacing: -.035em;
+}
+
+[data-game-design="cipher-pair"] [data-game-zone="private"] {
+  padding: .9rem;
+  border: 1px dashed var(--game-border);
+  border-radius: var(--game-radius);
+  background: var(--game-field);
+}
+
+[data-game-design="cipher-pair"] [data-game-card="Your half of the key"],
+[data-game-design="cipher-pair"] [data-game-card="Code on both screens"] {
+  background-color: var(--game-raised);
+  background-image: repeating-linear-gradient(0deg, transparent 0 1.7rem, #d9aff21f 1.7rem calc(1.7rem + 1px));
+}
+
+[data-game-design="cipher-pair"] :is([data-game-card="Your half of the key"], [data-game-card="Code on both screens"]) ul {
+  margin-left: 0;
+  padding-left: 0;
+  list-style: none;
+  line-height: 1.7;
+  font-family: var(--game-display);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+[data-game-design="cipher-pair"] [data-game-card="Decoded phrase"] {
+  border-inline-start-width: .35rem;
+  border-inline-start-color: var(--game-accent);
+}
+
+[data-game-design="cipher-pair"] [data-game-card="Decoded phrase"] p {
+  font-family: var(--game-display);
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 700;
+}
+
+@media (min-width: 50rem) {
+  [data-game-design="cipher-pair"][data-game-phase="decoding"] [data-game-zone="board"] {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+  }
+
+  [data-game-design="cipher-pair"][data-game-phase="decoding"] [data-game-zone="board"] > :is([data-game-zone="round"], [data-game-zone="detail"], [data-game-zone="standings"]) {
+    grid-column: 1 / -1;
+  }
+
+  [data-game-design="cipher-pair"][data-game-phase="decoding"] [data-game-zone="private"] {
+    grid-column: 1;
+    grid-row: 3 / span 2;
+    align-self: start;
+  }
+
+  [data-game-design="cipher-pair"][data-game-phase="decoding"] :is([data-game-zone="public"], [data-game-zone="actions"]) {
+    grid-column: 2;
+  }
+}
+
+/* Switchboard: a field console with a numbered signal trace and a direction pad. */
+[data-game-design="switchboard"], [data-game-cover="switchboard"] {
+  --game-backdrop: radial-gradient(ellipse at 65% 4%, #113a49, #091924 52%, #071018);
+  --game-surface: #102835;
+  --game-raised: #163947;
+  --game-field: #0d202b;
+  --game-border: #67968e;
+  --game-ink: #edfff9;
+  --game-muted: #b4ded7;
+  --game-accent: #83f2ce;
+  --game-action: #83f2ce;
+  --game-action-ink: #092c26;
+  --game-display: "Trebuchet MS", Arial, sans-serif;
+  --game-radius: .6rem;
+  --game-motif:
+    radial-gradient(circle, #83f2ce 0 26%, #102835 28% 44%, transparent 46%) 15% 19% / 1.2rem 1.2rem no-repeat,
+    radial-gradient(circle, #83f2ce 0 26%, #102835 28% 44%, transparent 46%) 84% 75% / 1.2rem 1.2rem no-repeat,
+    linear-gradient(90deg, #6bbda7, #6bbda7) 18% 28% / 39% 2px no-repeat,
+    linear-gradient(#6bbda7, #6bbda7) 49% 47% / 2px 50% no-repeat,
+    linear-gradient(90deg, #6bbda7, #6bbda7) 78% 68% / 38% 2px no-repeat,
+    repeating-linear-gradient(90deg, #1c4a51 0 1px, #0e303b 1px 12px);
+}
+
+[data-game-design="switchboard"] [data-game-zone="board"] {
+  box-shadow: inset 0 .3rem var(--game-border);
+}
+
+[data-game-design="switchboard"] [data-game-zone="private"] {
+  border: 1px solid var(--game-border);
+  border-radius: var(--game-radius);
+  padding: .85rem;
+  background: var(--game-field);
+}
+
+[data-game-design="switchboard"] [data-game-card="Signal"] {
+  border-inline-start-color: var(--game-accent);
+  background: var(--game-field);
+}
+
+[data-game-design="switchboard"] [data-game-card="Connected checkpoints"] ul {
+  display: grid;
+  gap: .5rem;
+  list-style: none;
+  margin-inline-start: .35rem;
+  padding-inline-start: .85rem;
+  border-inline-start: 2px solid var(--game-border);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-game-design="switchboard"] [data-game-card="Connected checkpoints"] li {
+  position: relative;
+}
+
+[data-game-design="switchboard"] [data-game-card="Connected checkpoints"] li::before {
+  position: absolute;
+  content: "";
+  inset-inline-start: -1.15rem;
+  top: .45rem;
+  width: .5rem;
+  height: .5rem;
+  border: 1px solid var(--game-accent);
+  border-radius: 50%;
+  background: var(--game-accent);
+}
+
+[data-game-design="switchboard"][data-game-phase="routing"] [data-game-zone="actions"] {
+  display: grid;
+  width: min(100%, 20rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(3rem, auto));
+  grid-template-areas: ". north ." "west . east" ". south .";
+  gap: .25rem;
+  padding: .5rem;
+  border: 1px solid var(--game-border);
+  border-radius: var(--game-radius);
+  background: var(--game-field);
+}
+
+[data-game-design="switchboard"][data-game-phase="routing"] [data-game-zone="actions"] button {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  padding-inline: .3rem;
+}
+
+[data-game-design="switchboard"] [data-game-action="North"] { grid-area: north; }
+[data-game-design="switchboard"] [data-game-action="East"] { grid-area: east; }
+[data-game-design="switchboard"] [data-game-action="South"] { grid-area: south; }
+[data-game-design="switchboard"] [data-game-action="West"] { grid-area: west; }
+
+@media (min-width: 50rem) {
+  [data-game-design="switchboard"][data-game-phase="routing"] [data-game-zone="board"] {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+
+  [data-game-design="switchboard"][data-game-phase="routing"] [data-game-zone="board"] > :is([data-game-zone="round"], [data-game-zone="detail"]) {
+    grid-column: 1 / -1;
+  }
+
+  [data-game-design="switchboard"][data-game-phase="routing"] [data-game-zone="private"] {
+    grid-row: 3 / span 2;
+    align-self: start;
+  }
+
+  [data-game-design="switchboard"][data-game-phase="routing"] :is([data-game-zone="public"], [data-game-zone="actions"]) {
+    grid-column: 2;
+  }
+}
+
+/* Double Bluff: warm cards on the dark felt of a two-seat table. */
+[data-game-design="double-bluff"], [data-game-cover="double-bluff"] {
+  --game-backdrop: radial-gradient(ellipse at 50% 12%, #512031, #210e19 64%, #180b12);
+  --game-surface: #421c2a;
+  --game-raised: #57263a;
+  --game-field: #2d1422;
+  --game-border: #ba8496;
+  --game-ink: #fff0df;
+  --game-muted: #f0cccd;
+  --game-accent: #ffd59a;
+  --game-action: #ffdbad;
+  --game-action-ink: #3f1927;
+  --game-display: "Palatino Linotype", Palatino, Georgia, serif;
+  --game-radius: 1rem;
+  --game-motif:
+    linear-gradient(45deg, transparent 28%, #ffd59a 29% 33%, #893e4f 34% 66%, #ffd59a 67% 71%, transparent 72%) 18% 50% / 42% 82% no-repeat,
+    linear-gradient(-45deg, transparent 28%, #ffd59a 29% 33%, #893e4f 34% 66%, #ffd59a 67% 71%, transparent 72%) 82% 50% / 42% 82% no-repeat,
+    repeating-linear-gradient(135deg, #542235 0 2px, #4a1e2e 2px 4px);
+}
+
+[data-game-design="double-bluff"] [data-game-zone="board"] {
+  border-radius: clamp(1.25rem, 4vw, 2.25rem);
+  border-width: 3px;
+  box-shadow: inset 0 0 0 .3rem var(--game-field);
+}
+
+[data-game-design="double-bluff"] [data-game-zone="private"] {
+  padding: .85rem;
+  border: 1px solid var(--game-border);
+  border-radius: var(--game-radius);
+  background-color: var(--game-field);
+}
+
+[data-game-design="double-bluff"] :is([data-game-card="Your parcel"], [data-game-card="Your claim cards"], [data-game-card="Parcel inspection"]) {
+  color: #381925;
+  border-color: #ae735e;
+  background: #ffe4c0;
+}
+
+[data-game-design="double-bluff"] :is([data-game-card="Your parcel"], [data-game-card="Your claim cards"], [data-game-card="Parcel inspection"]) p {
+  color: #542a37;
+}
+
+[data-game-design="double-bluff"] [data-game-card="Your claim cards"] ul {
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: .35rem;
+  flex-wrap: wrap;
+}
+
+[data-game-design="double-bluff"] [data-game-card="Your claim cards"] li {
+  padding: .3rem .45rem;
+  border: 1px solid #ae735e;
+  border-radius: .3rem;
+  background: #fff2dc;
+  overflow-wrap: anywhere;
+}
+
+[data-game-design="double-bluff"] [data-game-action="Challenge the claim"] {
+  color: var(--game-ink);
+  border: 2px solid var(--game-accent);
+  background: var(--game-field);
+}
+
+@media (min-width: 50rem) {
+  [data-game-design="double-bluff"][data-game-phase="claiming"] [data-game-zone="board"] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+
+  [data-game-design="double-bluff"][data-game-phase="claiming"] [data-game-zone="board"] > :is([data-game-zone="round"], [data-game-zone="detail"], [data-game-zone="actions"], [data-game-zone="standings"]) {
+    grid-column: 1 / -1;
+  }
+
+  [data-game-design="double-bluff"][data-game-phase="claiming"] [data-game-zone="private"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Sync or Swim: two parallel lanes and a shared poolside results strip. */
+[data-game-design="sync-or-swim"], [data-game-cover="sync-or-swim"] {
+  --game-backdrop: radial-gradient(ellipse at 48% 8%, #104c60, #092637 52%, #071825);
+  --game-surface: #103644;
+  --game-raised: #18505e;
+  --game-field: #092935;
+  --game-border: #72a8ad;
+  --game-ink: #effffb;
+  --game-muted: #c3e8e1;
+  --game-accent: #a6f2d9;
+  --game-action: #a6f2d9;
+  --game-action-ink: #143831;
+  --game-display: "Trebuchet MS", "Segoe UI", sans-serif;
+  --game-radius: 1.4rem;
+  --game-motif:
+    radial-gradient(ellipse at 40% 100%, transparent 47%, #a6f2d9 48% 54%, transparent 55%) 0 0 / 34% 50%,
+    radial-gradient(ellipse at 40% 0%, transparent 47%, #75cfc4 48% 54%, transparent 55%) 17% 100% / 34% 50%,
+    #126677;
+}
+
+[data-game-design="sync-or-swim"] [data-game-zone="round"] {
+  text-align: center;
+  justify-content: center;
+  padding: 1rem .8rem .9rem;
+  border-block: 3px double var(--game-border);
+  background: var(--game-field);
+}
+
+[data-game-design="sync-or-swim"] [data-game-zone="round"] > div {
+  margin-inline: auto;
+}
+
+[data-game-design="sync-or-swim"] [data-game-zone="actions"] form {
+  padding: .9rem;
+  border: 1px solid var(--game-border);
+  border-radius: var(--game-radius);
+  background: var(--game-field);
+}
+
+[data-game-design="sync-or-swim"] [data-game-zone="standings"] {
+  border-block-start: 1px solid var(--game-border);
+  padding-block-start: .8rem;
+}
+
+[data-game-design="sync-or-swim"] :is([data-game-card="Round timeline"], [data-game-card="Possible answers"]) {
+  border-inline-start-color: var(--game-accent);
+}
+
+[data-game-design="sync-or-swim"]:is([data-game-phase="reveal"], [data-game-phase="complete"]) [data-game-zone="public"] > [data-game-zone="card"]:is(:nth-child(2), :nth-child(3)) {
+  border-inline-start-width: 0;
+  border-block-start: 3px solid var(--game-accent);
+  border-radius: .6rem;
+}
+
+[data-game-design="sync-or-swim"]:is([data-game-phase="reveal"], [data-game-phase="complete"]) [data-game-zone="public"] > [data-game-zone="card"]:is(:nth-child(2), :nth-child(3)) p {
+  font-family: var(--game-display);
+  font-size: clamp(1.12rem, 3vw, 1.5rem);
+  font-weight: 700;
+}
+
+@media (min-width: 43rem) {
+  [data-game-design="sync-or-swim"]:is([data-game-phase="reveal"], [data-game-phase="complete"]) [data-game-zone="public"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-game-design="sync-or-swim"]:is([data-game-phase="reveal"], [data-game-phase="complete"]) [data-game-zone="public"] > [data-game-zone="card"]:is(:first-child, :last-child) {
+    grid-column: 1 / -1;
+  }
+
+  [data-game-design="sync-or-swim"] [data-game-zone="standings"] ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
+  }
+}
+
+@media (forced-colors: active) {
+  [data-game-design="switchboard"] [data-game-card="Connected checkpoints"] li::before {
+    background: CanvasText;
+    border-color: CanvasText;
+  }
+}
