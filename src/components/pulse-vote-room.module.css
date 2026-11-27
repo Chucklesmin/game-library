@@ -1,0 +1,57 @@
+.shell {
+  width: min(100%, 700px);
+  margin: clamp(38px, 8vw, 76px) auto;
+  display: grid;
+  gap: 16px;
+}
+.heading h1 {
+  margin: 0;
+  font: 900 clamp(48px, 9vw, 76px)/1 Georgia, serif;
+  letter-spacing: -.06em;
+}
+.heading p, .panel p, .panel small { color: var(--muted); line-height: 1.5; }
+.panel {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  background: #121b30;
+  border: 1px solid #4b5e86;
+  border-radius: 16px;
+  padding: clamp(15px, 4vw, 26px);
+}
+.panel h2, .panel p { margin: 0; }
+.panel h2 { font: 700 clamp(24px, 5vw, 36px)/1.15 Georgia, serif; }
+.field, .controls label { display: grid; gap: 5px; font-weight: 700; min-width: 0; }
+.field { width: min(100%, 350px); }
+.controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+.controls input { width: min(170px, 100%); }
+.room { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+.room > div:first-child { display: grid; gap: 2px; }
+.room strong { font-size: 24px; letter-spacing: .12em; }
+.round { font-weight: 800; }
+.stack { display: grid; gap: 8px; width: 100%; }
+.stack button { justify-self: start; }
+.stack fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.stack legend { margin-bottom: 6px; }
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  min-height: 44px;
+  border: 1px solid #63749a;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.choice:has(input:checked) { border-color: var(--gold); background: #2a2943; }
+.choice:focus-within { outline: 2px solid var(--gold); outline-offset: 2px; }
+.choice input { flex: 0 0 auto; margin: 0; accent-color: var(--gold); }
+.secondary { background: #273653; }
+.results, .scores { width: 100%; display: grid; gap: 10px; list-style: none; padding: 0; margin: 0; }
+.results li > div:first-child, .scores li { display: flex; justify-content: space-between; gap: 12px; }
+.results li > div:first-child > :last-child, .scores li > strong { flex: 0 0 auto; }
+.results li strong, .scores small { display: inline-block; margin-left: 9px; font-size: .8em; color: var(--gold); }
+.track { background: #314360; height: 7px; border-radius: 5px; margin-top: 5px; }
+.track span { display: block; background: var(--blue); height: 100%; border-radius: inherit; }
+.scores li { background: #182640; border-radius: 8px; padding: 9px 12px; overflow-wrap: anywhere; }
+.message { margin: 0; color: var(--gold); }

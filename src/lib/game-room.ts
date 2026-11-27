@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { isInvalidGuestSessionError } from "@/lib/guest-session.mjs";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { GameDefinition, RoomSnapshot } from "@/lib/game-library";
+import type { PulseVoteMove, PulseVoteView } from "@/lib/pulse-vote-game";
 
 const client = () => { if (!supabase) throw new Error("Multiplayer is not configured."); return supabase; };
 
@@ -166,6 +167,24 @@ export function cardsAgainstHumanityVote(roomId: string, submissionId: string) {
 
 export function cardsAgainstHumanityNext(roomId: string) {
   return invokeSignalRpc<CardsAgainstHumanityView>("cah_next_round", { p_room_id: roomId });
+}
+
+export async function joinPulseVoteRoom(code: string, displayName: string) {
+  await ensureGuest();
+  return invokeSignalRpc<RoomSnapshot>("pulse_vote_join", { p_code: code, p_display_name: displayName });
+}
+
+export function getPulseVoteView(roomId: string) {
+  return invokeSignalRpc<PulseVoteView>("pulse_vote_get_view", { p_room_id: roomId });
+}
+
+export function movePulseVote(view: PulseVoteView, move: PulseVoteMove) {
+  return invokeSignalRpc<PulseVoteView>("pulse_vote_move", {
+    p_room_id: view.roomId,
+    p_round_id: view.roundId,
+    p_action: move.action,
+    p_value: "value" in move ? move.value : null,
+  });
 }
 
 export function subscribeToRoom(roomId: string, onUpdate: (room: RoomSnapshot) => void, onStatus?: (status: string, error?: Error) => void) {
