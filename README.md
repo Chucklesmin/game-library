@@ -6,6 +6,8 @@ Game Library is a free, non-commercial game library. Its first game is **Wavelen
 
 The database has a generic `games → game_packs → game_content` catalog. A room records its selected game, immutable ruleset version, and game-specific state, allowing future games to use entirely different turn logic without altering room identity, membership, or realtime delivery. Wavelength's live actions use database RPCs, so targets remain in the protected round record until scoring reveals them.
 
+See [Game Library expansion](docs/roadmap-games.md) for the additional private multiplayer games and local configuration.
+
 ## Wavelength rules
 
 Wavelength is cooperative. One rotating Keeper privately sees a target on a continuum and gives one clue. Everyone else discusses the clue and locks one shared dial position. Reveal scores the group 4 / 3 / 2 points by proximity, or 0 outside the scoring band. The Keeper rotates by join order between rounds, and the room keeps one shared score.
