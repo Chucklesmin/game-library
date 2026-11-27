@@ -23,14 +23,14 @@ const authOptions = { autoRefreshToken: false, persistSession: false, detectSess
 
 export function roadmapConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && process.env.ROADMAP_SUPABASE_SECRET_KEY);
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && process.env.ROADMAP_RPC_TOKEN);
 }
 
 async function authenticate(request: Request) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publicKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const secretKey = process.env.ROADMAP_SUPABASE_SECRET_KEY;
-  if (!url || !publicKey || !secretKey) throw new RoomError("Game rooms are temporarily unavailable.", 503);
+  const serverToken = process.env.ROADMAP_RPC_TOKEN;
+  if (!url || !publicKey || !serverToken) throw new RoomError("Game rooms are temporarily unavailable.", 503);
   const token = request.headers.get("authorization")?.match(/^Bearer ([\w.-]+)$/i)?.[1];
   if (!token) throw new RoomError("Sign in as a guest to continue.", 401);
 
@@ -38,7 +38,10 @@ async function authenticate(request: Request) {
   const { data, error } = await auth.auth.getUser(token);
   if (error || !data.user) throw new RoomError("Your guest session expired. Reopen the room to reconnect.", 401);
   return {
-    service: createClient(url, secretKey, { auth: authOptions }),
+    service: createClient(url, publicKey, {
+      auth: authOptions,
+      global: { headers: { Authorization: `Bearer ${token}`, "x-roadmap-server-token": serverToken } },
+    }),
     actorId: data.user.id,
   };
 }
@@ -67,8 +70,8 @@ function roomView(room: Room, game: GameDefinition<unknown>, actorId: string): R
   };
 }
 
-async function loadRoom(service: Service, id: string, slug: string, actor: string) {
-  const { data, error } = await service.rpc("roadmap_load", { p_id: id, p_slug: slug, p_actor: actor });
+async function loadRoom(service: Service, id: string, slug: string) {
+  const { data, error } = await service.rpc("roadmap_server_load", { p_id: id, p_slug: slug });
   if (error) throw new RoomError("Could not load this room.", 503);
   if (!data) throw new RoomError("This room is unavailable for your guest session.", 404);
   return data as Room;
@@ -125,7 +128,7 @@ export async function getRoadmapRoom(request: Request, game: GameDefinition<unkn
   const id = new URL(request.url).searchParams.get("room");
   if (!isUuid(id)) throw new RoomError("Choose a room to open.", 400);
   const { service, actorId } = await authenticate(request);
-  const room = await loadRoom(service, id, game.slug, actorId);
+  const room = await loadRoom(service, id, game.slug);
   return roomView(room, game, actorId);
 }
 
@@ -137,8 +140,8 @@ export async function postRoadmapRoom(request: Request, game: GameDefinition<unk
     const code = typeof body.code === "string" ? body.code.trim().toUpperCase() : "";
     if (!name || [...name].length > 24) throw new RoomError("Choose a display name of 1–24 characters.", 400);
     if (body.operation === "join" && !/^[0-9A-F]{6}$/.test(code)) throw new RoomError("Enter the six-character room code.", 400);
-    const { data, error } = await service.rpc("roadmap_open", {
-      p_slug: game.slug, p_actor: actorId, p_name: name, p_max: game.maximumPlayers,
+    const { data, error } = await service.rpc("roadmap_server_open", {
+      p_slug: game.slug, p_name: name, p_max: game.maximumPlayers,
       p_code: body.operation === "join" ? code : null,
     });
     if (error?.code === "P0001") throw new RoomError(error.message, 409);
@@ -152,7 +155,7 @@ export async function postRoadmapRoom(request: Request, game: GameDefinition<unk
   // Distinct players can act simultaneously in the same turn. On contention,
   // reload the state and rerun the rules before committing another revision.
   for (let attempt = 0; attempt < 16; attempt += 1) {
-    const room = await loadRoom(service, body.room, game.slug, actorId);
+    const room = await loadRoom(service, body.room, game.slug);
     const { context, view, turn } = project(room, game, actorId);
     if (body.turn !== turn) throw new RoomError("The game has moved on. Try the current turn.", 409);
     let state: unknown;
@@ -172,8 +175,8 @@ export async function postRoadmapRoom(request: Request, game: GameDefinition<unk
     } catch (error) {
       throw new RoomError(error instanceof Error ? error.message : "This move is not available.", 409);
     }
-    const { data, error } = await service.rpc("roadmap_commit", {
-      p_id: room.id, p_actor: actorId, p_revision: room.revision, p_state: state,
+    const { data, error } = await service.rpc("roadmap_server_commit", {
+      p_id: room.id, p_revision: room.revision, p_state: state,
       p_match: starting ? randomUUID() : room.match_id,
     });
     if (error) throw new RoomError("Could not save this move.", 503);

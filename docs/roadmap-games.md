@@ -10,8 +10,16 @@ Start the local Supabase stack with anonymous sign-ins enabled and apply the mig
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | The API URL reported by `npx supabase status` |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | The local publishable key or legacy anonymous key |
-| `ROADMAP_SUPABASE_SECRET_KEY` | The local secret key or legacy service-role key. Server only. |
+| `ROADMAP_RPC_TOKEN` | A server-only 64-character random hex token. Store only its SHA-256 hash in the database. |
 | `NEXT_PUBLIC_ROADMAP_GAMES_ENABLED` | `true` to show the expansion in the Library |
+
+Generate a 32-byte random token and encode it as 64 hexadecimal characters. Set that value as `ROADMAP_RPC_TOKEN` in the app only. Compute the SHA-256 of the encoded string and provision only the resulting hex digest through an authorized SQL session:
+
+```sql
+insert into private.roadmap_server_credentials (token_hash)
+values (decode('<64-character SHA-256 digest>', 'hex'))
+on conflict (singleton) do update set token_hash = excluded.token_hash;
+```
 
 Run `npm run dev -- --port 3100`, then open the Library. Use a separate browser profile, private window, or device for each player so they have distinct guest identities. For same-device testing, modern private windows often share one private session. Use independent profiles or browser contexts instead.
 
@@ -24,4 +32,4 @@ Run `npm test` for game-rule checks and `node scripts/validate-roadmap-local.mjs
 - A room’s activity timestamp refreshes when a new player joins or a move is accepted. Its data becomes eligible for cleanup after 24 idle hours and is removed by an hourly job.
 - `src/lib/roadmap/games` holds the individual game rules and first-party starter content. The Library contains a separate public metadata list and the server owns the game registry.
 
-Hosted enablement requires the additive room migration, server-only key configuration, and hosted multi-session acceptance. The separate Library flag can keep the new cards hidden while the direct routes are validated.
+Hosted enablement requires the additive room migration, server-only token configuration, and hosted multi-session acceptance. The separate Library flag can keep the new cards hidden while the direct routes are validated.

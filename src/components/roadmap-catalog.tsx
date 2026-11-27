@@ -26,7 +26,11 @@ export function RoadmapCatalog() {
     </div>
     <div className="game-grid">
       {games.map((game) => <Link href={`/games/${game.slug}`} key={game.slug} className="game-card caption-card-link">
-        <div><h3>{game.title}</h3><p>{game.description}</p></div>
+        <div>
+          <h3>{game.referenceName ?? game.title}</h3>
+          {game.referenceName && <p className="game-meta">Game Library variant · {game.title}</p>}
+          <p>{game.description}</p>
+        </div>
         <span className="game-meta">{game.minimumPlayers === game.maximumPlayers ? game.minimumPlayers
           : `${game.minimumPlayers}–${game.maximumPlayers}`} players · Private online room</span>
       </Link>)}

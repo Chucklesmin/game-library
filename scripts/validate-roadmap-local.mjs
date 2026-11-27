@@ -119,6 +119,8 @@ for (const game of roadmapCatalog) {
   assert.equal(rejoined.revision, room.revision);
   const privateTable = await participant.client.rpc("roadmap_load", { p_id: room.id, p_slug: slug, p_actor: participant.id });
   assert.ok(privateTable.error, "public client cannot load raw internal state");
+  const withoutServer = await participant.client.rpc("roadmap_server_load", { p_id: room.id, p_slug: slug });
+  assert.match(withoutServer.error?.message ?? "", /server authentication required/i);
   const normalSignal = await participant.client.from("roadmap_room_updates").select("id,revision").eq("id", room.id);
   assert.equal(normalSignal.error, null);
   assert.deepEqual(normalSignal.data, [{ id: room.id, revision: room.revision }]);
